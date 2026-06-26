@@ -50,6 +50,13 @@
       ]
     }
   },
-  "hotPaths": [],
+  "hotPaths": [
+    {
+      "path": "docs/positioning.md",
+      "accessCount": 1,
+      "lastAccessed": 1782456621260,
+      "type": "file"
+    }
+  ],
   "userDirectives": []
 }
