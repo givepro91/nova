@@ -27,7 +27,8 @@ if (!isGitRepo(dir)) process.exit(0);
 const files = changedFiles(dir);
 if (!files) process.exit(0);
 
-const threshold = parseInt(process.env.HANDOFF_MIN_CHANGED_FILES || '3', 10);
+let threshold = parseInt(process.env.HANDOFF_MIN_CHANGED_FILES || '3', 10);
+if (!Number.isFinite(threshold) || threshold < 1) threshold = 3; // malformed env → default, not NaN
 if (files.length < threshold) process.exit(0);                 // ignore trivial changes
 
 // staleness: stale if the branch handoff is missing, or older than the most recently edited changed file

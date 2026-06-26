@@ -31,19 +31,22 @@ Plugins are **independently installable** — no cross-plugin imports. Reason: c
 
 Violet: `#7c3aed` (primary) · `#a855f7` (light) · `#6d28d9` (deep). Light theme, system font stack (Korean: Apple SD Gothic / Pretendard). No webfont CDN (CSP).
 
-## Inc 1.5 — absorbed-code bug backlog (from /code-review, fix with care + node --check + a test each)
+## Inc 1.5 — absorbed-code bug fixes (from /code-review)
 
-Fix in a **shared lib** where the pattern recurs (nova-gate will reuse front-matter/threshold/porcelain patterns):
+Fixes live in each plugin's own files (no cross-plugin shared lib — independent-install rule). nova-gate will copy the hardened patterns. **Verified by `tests/inc15-verify.sh` (ALL PASS).**
 
-- `handoff/hooks/_lib.mjs` `changedFiles` — `git status --porcelain` quotes non-ASCII (Korean) paths via `core.quotepath` → use `-z`/NUL split or `-c core.quotepath=false`. **(High: Korean filenames)**
-- `handoff/hooks/_lib.mjs:75` `parseFrontMatter` — `^---\n` regex fails/keeps `\r` on CRLF → tolerate `\r?\n` and trim values.
-- `handoff/hooks/stop.mjs:30` — `parseInt(malformed)=NaN` → `len < NaN` always false → blocks every change. Add `Number.isNaN` fallback.
-- `handoff/hooks/_lib.mjs:53` `branchSlug` — `feat/login` and `feat-login` collide to one handoff file. Disambiguate.
-- `claude-md/scripts/apply-block.mjs:67` — learned rules silently dropped if new body lacks `LEARN:ANCHOR`. Guard + warn.
-- `claude-md/scripts/append-rule.mjs:27` — missing-END → dedup region spans whole file → new rule wrongly skipped. Use whole-line END match (consistent with apply-block).
-- (lower) `session-start.mjs:31` `slice(4000)` can split a surrogate pair; `stop.mjs:38` mtime staleness fooled by checkout/formatter.
+**Fixed ✅**
+- `handoff/hooks/_lib.mjs` `changedFiles` — non-ASCII (Korean) paths were octal-quoted by `core.quotepath` → now `-c core.quotepath=false`. *(verified: `한글파일.md` returned literally)*
+- `_lib.mjs` `parseFrontMatter` — `^---\n` failed / kept `\r` on CRLF → now `\r?\n`-tolerant. *(verified: CRLF `status: closed` parsed)*
+- `handoff/hooks/stop.mjs` threshold — `parseInt(malformed)=NaN` → `Number.isFinite` fallback to 3 (no more "block every change").
+- `claude-md/scripts/apply-block.mjs` — refuses to write (exit 1, **no data loss**) when the new body lacks `LEARN:ANCHOR` but learned rules exist. *(verified)*
+- `claude-md/scripts/append-rule.mjs` — whole-line END match (consistent w/ apply-block); errors if END missing instead of dedup-against-whole-file. *(verified)*
 
-worklog mockup a11y (Inc 3 template): `--ink-3 #a29fb0` = 2.59:1 (AA fail, widely used); standalone needs `<html lang="ko">` + `<meta charset>`; verdict pills sub-AA + color-only.
+**Deferred (low-likelihood / invasive — documented, not fixed)**
+- `_lib.mjs` `branchSlug` — `feat/login` vs `feat-login` collide to one handoff file. Fix changes the filename scheme (touches docs + hooks) → defer.
+- `session-start.mjs` `slice(4000)` may split a surrogate pair (cosmetic); `stop.mjs` mtime staleness fooled by checkout/formatter (inherent heuristic).
+
+**worklog a11y — apply when building the Inc 3 `--visual` template:** `--ink-3 #a29fb0` = 2.59:1 (AA fail, widely-used token); standalone HTML needs `<html lang="ko">` + `<meta charset>`; verdict pills sub-AA + color-only (and badges must be evidence-gated regardless).
 
 ## Verification trail
 

@@ -62,7 +62,7 @@ export function nowISO() { return new Date().toISOString(); }
 
 /** git status --porcelain → 변경 파일 경로 배열(rename 은 대상 경로). */
 export function changedFiles(dir) {
-  const out = git(dir, 'status --porcelain');
+  const out = git(dir, '-c core.quotepath=false status --porcelain');
   if (out == null) return null;
   return out.split('\n')
     .filter((l) => l.length > 3)               // "XY path"
@@ -72,7 +72,7 @@ export function changedFiles(dir) {
 
 /** 아주 단순한 front-matter 파서. { data, body } 반환. front-matter 없으면 data={}. */
 export function parseFrontMatter(content) {
-  const m = /^---\n([\s\S]*?)\n---\n?/.exec(content);
+  const m = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?/.exec(content);
   if (!m) return { data: {}, body: content };
   const data = {};
   for (const line of m[1].split('\n')) {

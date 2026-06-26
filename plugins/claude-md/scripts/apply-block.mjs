@@ -69,6 +69,10 @@ if (sm && em && em.index > sm.index) {
     const endInOld = oldBlock.search(lineRe(END));
     const learned = oldBlock.slice(oai + ANCHOR.length, endInOld).replace(/\s+$/, '');
     const nai = block.indexOf(ANCHOR);
+    if (learned.trim() && nai === -1) {                  // would silently drop accumulated rules
+      console.error(`refusing to write ${file}: new block body has no ${ANCHOR} — that would drop accumulated Self-Learning rules`);
+      process.exit(1);
+    }
     if (nai !== -1 && learned.trim()) {
       block = block.slice(0, nai + ANCHOR.length) + learned + block.slice(nai + ANCHOR.length);
     }

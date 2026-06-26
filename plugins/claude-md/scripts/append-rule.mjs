@@ -23,8 +23,12 @@ if (ai === -1) { console.error('No CC-RULES Self-Learning anchor — run /claude
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9가-힣]+/g, ' ').trim();
 const stripBullet = (l) => l.replace(/^\s*-\s+(\(\d{4}-\d{2}-\d{2}\)\s*)?/, '');
 
-// existing rule lines live between the anchor and END
-const region = content.slice(ai + ANCHOR.length, content.indexOf(END, ai) === -1 ? undefined : content.indexOf(END, ai));
+// existing rule lines live between the anchor and the END marker (whole-line match, consistent with apply-block.mjs)
+const endRe = new RegExp('^' + END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[ \\t]*$', 'm');
+const afterAnchor = content.slice(ai + ANCHOR.length);
+const endRel = afterAnchor.search(endRe);
+if (endRel === -1) { console.error('No CC-RULES:END after the Self-Learning anchor — run /claude-md first'); process.exit(1); }
+const region = afterAnchor.slice(0, endRel);
 const existingRules = region.split('\n').filter((l) => /^\s*-\s+/.test(l));
 const nRule = norm(rule);
 if (existingRules.some((l) => norm(stripBullet(l)) === nRule)) {
