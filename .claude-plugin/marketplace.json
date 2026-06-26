@@ -1,0 +1,16 @@
+{
+  "name": "nova",
+  "owner": { "name": "Jay (Spacewalk)", "email": "jay@spacewalk.tech" },
+  "plugins": [
+    {
+      "name": "claude-md",
+      "source": "./plugins/claude-md",
+      "description": "Generate and maintain a high-quality CLAUDE.md (Karpathy discipline + Anthropic best-practices + adaptive parallel-git workflow) via an idempotent managed block, plus /learn — append a rule whenever Claude makes a mistake (compounding engineering)."
+    },
+    {
+      "name": "handoff",
+      "source": "./plugins/handoff",
+      "description": "Hook-enforced, branch-aware, ephemeral session handoff — auto-preserves open work to a per-branch, git-tracked docs/handoff/<branch>.md (status active|blocked, + derived board) so parallel branches/worktrees never collide; resolve deletes finished handoffs and prune clears merged/orphaned ones. The next session, even on another machine, continues seamlessly."
+    }
+  ]
+}

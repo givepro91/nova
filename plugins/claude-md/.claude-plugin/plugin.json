@@ -1,0 +1,10 @@
+{
+  "name": "claude-md",
+  "description": "Generate/refresh a project's agent rules via a hybrid model — a tailored preamble plus an idempotent managed block (Karpathy working discipline, verification, adaptive parallel-git workflow with worktree-first isolation, self-learning rules). Canonical-file aware: writes to CLAUDE.md, or AGENTS.md when the repo is multi-tool (Codex). Ships with /learn to append a rule whenever the agent makes a mistake. Re-runnable; never touches content outside its managed block.",
+  "version": "0.3.0",
+  "author": { "name": "Jay (Spacewalk)", "email": "jay@spacewalk.tech" },
+  "homepage": "https://github.com/givepro91/nova",
+  "repository": "https://github.com/givepro91/nova",
+  "license": "MIT",
+  "keywords": ["claude-md", "claude.md", "generator", "discipline", "compounding", "learn", "git-workflow", "skills"]
+}
