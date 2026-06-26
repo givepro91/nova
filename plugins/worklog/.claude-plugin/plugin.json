@@ -1,0 +1,10 @@
+{
+  "name": "worklog",
+  "description": "The record loop — /document synthesizes a session into a durable narrative (what was done, decisions & WHY over which alternatives, what was learned, what's left open), NOT a git-log dump. Optional --visual renders a self-contained, Nova-branded HTML deterministically (verdict badges only from nova-gate's ledger — never fabricated). Manual, zero context tax.",
+  "version": "0.1.0",
+  "author": { "name": "Jay (Spacewalk)", "email": "jay@spacewalk.tech" },
+  "homepage": "https://github.com/givepro91/nova",
+  "repository": "https://github.com/givepro91/nova",
+  "license": "MIT",
+  "keywords": ["worklog", "session", "record", "narrative", "document", "report"]
+}
