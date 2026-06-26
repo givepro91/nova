@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova — a compounding-agent nervous system for Claude Code</title>
+<meta name="description" content="Nova is a single lean Claude Code plugin — five loops that turn each coding session into raw material the agent learns from, so it compounds instead of resetting. Honest, git-native, low context-tax.">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Nova — compounding-agent nervous system for Claude Code">
+<meta property="og:description" content="Five lean loops so your Claude Code sessions compound instead of resetting. Honest, git-native, low context-tax. One-line install.">
+<meta property="og:type" content="website">
+<style>
+  :root {
+    --violet: #8b5cf6;
+    --violet-bright: #a855f7;
+    --violet-deep: #7c3aed;
+    --violet-ink: #c4b5fd;
+    --bg: #0a0a0f;
+    --bg-2: #0c0b12;
+    --panel: #141220;
+    --panel-2: #1a1728;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(168,139,250,0.22);
+    --ink-1: #f3f0fb;
+    --ink-2: #c2bcd6;       /* body on dark — high contrast */
+    --ink-3: #8d87a3;       /* muted on dark — AA-safe (~5.5:1) */
+    --green: #6ee7a8;
+    --red: #fb7185;
+    --comment: #6b6685;
+    --radius: 16px;
+    --maxw: 1080px;
+    --readw: 760px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
+            Pretendard, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--ink-2);
+    background: var(--bg);
+    line-height: 1.7;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+    /* Korean-friendly wrapping: never split a 어절 mid-word */
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* ---- bilingual: KO default, EN toggle ---- */
+  [data-show="en"] { display: none; }
+  body[data-lang="en"] [data-show="ko"] { display: none; }
+  body[data-lang="en"] [data-show="en"] { display: revert; }
+
+  a { color: var(--violet-ink); text-decoration: none; transition: color .15s; }
+  a:hover { color: var(--violet-bright); }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .read { max-width: var(--readw); margin: 0 auto; }
+
+  h1, h2, h3 { color: var(--ink-1); line-height: 1.28; letter-spacing: -0.015em; font-weight: 700; }
+  h2 { font-size: clamp(1.5rem, 3.4vw, 2rem); margin: 0 0 14px; }
+  h3 { font-size: 1.08rem; margin: 0 0 8px; }
+  p  { margin: 0 0 16px; }
+  .muted { color: var(--ink-3); }
+  .small { font-size: 0.88rem; }
+  em { color: var(--violet-ink); font-style: normal; }
+
+  code, kbd, .mono { font-family: var(--mono); }
+  :not(pre) > code {
+    background: rgba(168,139,250,0.10);
+    color: var(--violet-ink);
+    padding: 0.12em 0.42em;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 0.9em;
+  }
+  .grad {
+    background: linear-gradient(102deg, #c4b5fd 0%, var(--violet-bright) 45%, var(--violet-deep) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* reveal-on-scroll */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ============ NAV ============ */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+    background: rgba(10,10,15,0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid transparent; transition: background .2s, border-color .2s;
+  }
+  .nav.scrolled { background: rgba(10,10,15,0.82); border-bottom-color: var(--border); }
+  .nav-inner { display: flex; align-items: center; gap: 18px; height: 62px; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; color: var(--ink-1); font-size: 1.05rem; }
+  .brand .mark {
+    width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--violet-bright), var(--violet-deep));
+    box-shadow: 0 0 16px rgba(139,92,246,0.5);
+  }
+  .brand .ver { font-size: 0.68rem; font-weight: 600; color: var(--violet-ink); background: rgba(168,139,250,0.12);
+    border: 1px solid var(--border-strong); padding: 2px 7px; border-radius: 999px; letter-spacing: 0.02em; }
+  .nav-links { display: flex; gap: 4px; margin-left: auto; }
+  .nav-links a {
+    color: var(--ink-3); font-size: 0.86rem; font-weight: 500; padding: 7px 11px; border-radius: 8px;
+    transition: color .15s, background .15s;
+  }
+  .nav-links a:hover { color: var(--ink-1); background: rgba(255,255,255,0.04); }
+  .nav-links a.active { color: var(--violet-ink); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+
+  .lang-switch { display: inline-flex; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+  .lang-switch button {
+    appearance: none; border: 0; background: transparent; cursor: pointer; font: inherit;
+    font-size: 0.76rem; font-weight: 600; color: var(--ink-3); padding: 4px 11px; border-radius: 999px; line-height: 1;
+  }
+  .lang-switch button[aria-pressed="true"] { background: var(--violet-deep); color: #fff; }
+  .lang-switch button:focus-visible, .btn:focus-visible, .copy-btn:focus-visible, .gh:focus-visible { outline: 2px solid var(--violet-bright); outline-offset: 2px; }
+
+  .gh { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-2); font-size: 0.84rem; font-weight: 600;
+    padding: 7px 12px; border: 1px solid var(--border); border-radius: 9px; }
+  .gh:hover { color: var(--ink-1); border-color: var(--border-strong); }
+  .gh svg { width: 16px; height: 16px; fill: currentColor; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font: inherit;
+    font-size: 0.88rem; font-weight: 600; color: #fff; text-decoration: none;
+    background: linear-gradient(135deg, var(--violet-bright), var(--violet-deep));
+    border: 0; padding: 9px 18px; border-radius: 10px; box-shadow: 0 6px 22px rgba(124,58,237,0.32);
+    transition: transform .12s, box-shadow .2s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(124,58,237,0.45); color: #fff; }
+  .btn.ghost { background: transparent; color: var(--ink-1); border: 1px solid var(--border-strong); box-shadow: none; }
+  .btn.ghost:hover { background: rgba(168,139,250,0.08); }
+
+  /* ============ HERO ============ */
+  .hero { position: relative; overflow: hidden; padding: 150px 0 84px; text-align: center; }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(900px 460px at 50% -60px, rgba(124,58,237,0.26), transparent 62%),
+      radial-gradient(700px 400px at 85% 10%, rgba(168,85,247,0.12), transparent 60%);
+  }
+  .hero-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .tok {
+    position: absolute; font-family: var(--mono); font-size: 0.8rem; color: var(--violet-ink);
+    opacity: 0.07; white-space: nowrap; animation: drift linear infinite;
+  }
+  @keyframes drift {
+    0%   { transform: translateY(14px); opacity: 0; }
+    12%  { opacity: 0.09; }
+    88%  { opacity: 0.09; }
+    100% { transform: translateY(-26px); opacity: 0; }
+  }
+  .hero .inner { position: relative; z-index: 1; }
+  .ey-badge {
+    display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono);
+    font-size: 0.78rem; color: var(--violet-ink);
+    background: rgba(168,139,250,0.08); border: 1px solid var(--border-strong);
+    padding: 6px 14px; border-radius: 999px; margin-bottom: 26px;
+  }
+  .ey-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .hero h1 { font-size: clamp(2.3rem, 6.4vw, 3.7rem); margin: 0 0 22px; letter-spacing: -0.03em; }
+  .hero .lead { font-size: clamp(1.05rem, 2.4vw, 1.22rem); color: var(--ink-2); max-width: 620px; margin: 0 auto 14px; }
+  .hero .tags { color: var(--ink-3); font-size: 0.96rem; }
+  .hero .tags b { color: var(--violet-ink); font-weight: 600; }
+
+  .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 30px 0 6px; }
+
+  /* stat row */
+  .stats { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px 40px; margin: 40px auto 0; }
+  .stat { text-align: center; min-width: 84px; }
+  .stat .n { font-size: 2rem; font-weight: 800; color: var(--ink-1); letter-spacing: -0.02em; line-height: 1; font-family: var(--mono); }
+  .stat .n em { color: var(--violet-bright); }
+  .stat .l { font-size: 0.78rem; color: var(--ink-3); margin-top: 7px; letter-spacing: 0.02em; }
+
+  /* terminal / install block */
+  .term { text-align: left; background: #100e18; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .term-bar { display: flex; align-items: center; gap: 7px; padding: 11px 15px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.015); }
+  .term-bar .d { width: 11px; height: 11px; border-radius: 50%; background: #2a2740; }
+  .term-bar .t { margin-left: 8px; font-family: var(--mono); font-size: 0.74rem; color: var(--ink-3); }
+  pre.code { margin: 0; padding: 18px 20px; font-family: var(--mono); font-size: 0.86rem; line-height: 1.75; color: #ddd6f3; overflow-x: auto; white-space: pre; }
+  pre.code .c { color: var(--comment); }
+  pre.code .p { color: var(--violet-bright); }
+  pre.code .g { color: var(--green); }
+  pre.code .r { color: var(--red); }
+  pre.code .d { color: var(--ink-3); }
+  .install-card { position: relative; max-width: 500px; margin: 34px auto 0; }
+  .copy-btn {
+    position: absolute; top: 9px; right: 10px; z-index: 2;
+    appearance: none; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--ink-2);
+    font: inherit; font-size: 0.72rem; font-weight: 600; padding: 5px 11px; border-radius: 8px; cursor: pointer;
+  }
+  .copy-btn:hover { background: rgba(168,139,250,0.12); color: var(--ink-1); }
+
+  /* ============ SECTIONS ============ */
+  section.block { position: relative; padding: 88px 0; border-top: 1px solid var(--border); scroll-margin-top: 76px; }
+  section.alt { background: var(--bg-2); }
+  .eyebrow { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; color: var(--violet); margin: 0 0 14px; }
+  .sec-head { margin-bottom: 38px; }
+  .sec-head p { margin: 8px 0 0; color: var(--ink-3); max-width: 620px; }
+
+  .story p { font-size: 1.06rem; }
+  .pull {
+    margin: 30px 0 6px; padding: 20px 26px; border-left: 3px solid var(--violet);
+    background: linear-gradient(100deg, rgba(139,92,246,0.10), transparent);
+    border-radius: 0 12px 12px 0; font-size: 1.12rem; color: var(--ink-1); line-height: 1.6;
+  }
+
+  /* loop cards */
+  .loops { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .loop { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 22px 20px; transition: border-color .2s, transform .2s; }
+  .loop:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+  .loop .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
+  .loop .role { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; color: var(--ink-3); text-transform: uppercase; }
+  .loop code { font-size: 0.86rem; background: rgba(168,139,250,0.10); color: var(--violet-ink); border: 1px solid var(--border); border-radius: 8px; padding: 4px 9px; }
+  .loop p { margin: 0; font-size: 0.95rem; color: var(--ink-2); }
+  .loop.wide { grid-column: 1 / -1; }
+
+  /* gate spotlight */
+  .spot { position: relative; border-radius: 22px; padding: 42px 38px; overflow: hidden;
+    background: linear-gradient(165deg, #1b1530, #110f1c);
+    border: 1px solid var(--border-strong); }
+  .spot::before { content:""; position:absolute; inset:0; pointer-events:none;
+    background: radial-gradient(560px 240px at 80% -30px, rgba(168,85,247,0.22), transparent 60%); }
+  .spot > * { position: relative; }
+  .spot h2 { color: #fff; }
+  .qs { display: grid; gap: 10px; margin-top: 22px; }
+  .q { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px; padding: 13px 18px; font-size: 0.97rem; color: var(--ink-1); display: flex; gap: 11px; align-items: baseline; }
+  .q .x { color: var(--violet-bright); font-weight: 700; flex: none; }
+  .q b { color: #fff; }
+
+  /* coexist */
+  .triad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 10px; }
+  .triad .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 20px; }
+  .triad .card.you { border-color: var(--border-strong); background: linear-gradient(160deg, rgba(139,92,246,0.10), var(--panel)); }
+  .triad .tag { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); letter-spacing: 0.05em; margin-bottom: 10px; }
+  .triad .you .tag { color: var(--violet-ink); }
+  .triad .card h3 { font-size: 1rem; }
+  .triad .card p { margin: 0; font-size: 0.9rem; color: var(--ink-3); }
+
+  /* feature mini-grid */
+  .why { display: grid; grid-template-columns: repeat(2, 1fr); gap: 13px; margin-top: 6px; }
+  .why .item { background: var(--panel); border: 1px solid var(--border); border-radius: 13px; padding: 18px 20px; }
+  .why .item h3 { font-size: 0.98rem; display: flex; gap: 9px; align-items: baseline; }
+  .why .item .n { font-family: var(--mono); font-size: 0.78rem; color: var(--violet); }
+  .why .item p { margin: 0; font-size: 0.9rem; color: var(--ink-3); }
+
+  /* facts list */
+  ul.facts { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 11px; }
+  ul.facts li { padding-left: 24px; position: relative; font-size: 0.97rem; color: var(--ink-2); }
+  ul.facts li::before { content: "→"; position: absolute; left: 0; color: var(--violet); font-weight: 700; }
+
+  /* FAQ */
+  .faq { display: grid; gap: 10px; }
+  details.qa { background: var(--panel); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
+  details.qa summary { cursor: pointer; list-style: none; padding: 17px 20px; font-weight: 600; color: var(--ink-1); font-size: 1rem; display: flex; justify-content: space-between; gap: 12px; }
+  details.qa summary::-webkit-details-marker { display: none; }
+  details.qa summary::after { content: "+"; color: var(--violet); font-weight: 700; font-size: 1.25rem; line-height: 1; flex: none; }
+  details.qa[open] summary::after { content: "–"; }
+  details.qa .a { padding: 0 20px 18px; color: var(--ink-3); font-size: 0.94rem; }
+
+  footer { padding: 50px 0 64px; border-top: 1px solid var(--border); text-align: center; color: var(--ink-3); }
+  footer .links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  footer .links a { font-weight: 600; font-size: 0.9rem; }
+
+  @media (max-width: 820px) {
+    .nav-links { display: none; }
+    .loops, .why { grid-template-columns: 1fr; }
+    .triad { grid-template-columns: 1fr; }
+    .hero { padding-top: 128px; }
+    .spot { padding: 32px 24px; }
+  }
+  @media (max-width: 480px) {
+    .gh span { display: none; }
+    .stats { gap: 14px 26px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .tok { animation: none; opacity: 0.06; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+</head>
+<body data-lang="ko">
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" aria-label="Nova">
+      <span class="mark" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.4 7.1L22 12l-7.6 2.9L12 22l-2.4-7.1L2 12l7.6-2.9z"/></svg>
+      </span>
+      Nova <span class="ver">v0.2.0</span>
+    </a>
+    <div class="nav-links">
+      <a href="#why" data-show="ko">왜</a><a href="#why" data-show="en">Why</a>
+      <a href="#loops">Loops</a>
+      <a href="#gate">Gate</a>
+      <a href="#coexist" data-show="ko">공존</a><a href="#coexist" data-show="en">Coexist</a>
+      <a href="#demo">Demo</a>
+      <a href="#install" data-show="ko">설치</a><a href="#install" data-show="en">Install</a>
+    </div>
+    <div class="nav-right">
+      <div class="lang-switch" role="group" aria-label="Language / 언어">
+        <button type="button" id="btn-ko" aria-pressed="true">KO</button>
+        <button type="button" id="btn-en" aria-pressed="false">EN</button>
+      </div>
+      <a class="gh" href="https://github.com/givepro91/nova" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span>GitHub</span>
+      </a>
+      <a class="btn" href="#install" data-show="ko">설치</a>
+      <a class="btn" href="#install" data-show="en">Install</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true">
+    <span class="tok" style="left:6%; top:24%; animation-duration:13s;">/gate</span>
+    <span class="tok" style="left:14%; top:62%; animation-duration:17s; animation-delay:2s;">claim → evidence</span>
+    <span class="tok" style="left:78%; top:20%; animation-duration:15s; animation-delay:1s;">verifier: independent</span>
+    <span class="tok" style="left:70%; top:70%; animation-duration:19s; animation-delay:3s;">handoff written</span>
+    <span class="tok" style="left:30%; top:14%; animation-duration:16s; animation-delay:4s;">LEARN: rule added</span>
+    <span class="tok" style="left:50%; top:80%; animation-duration:14s; animation-delay:1.5s;">tests: 12 passed</span>
+    <span class="tok" style="left:86%; top:48%; animation-duration:18s; animation-delay:2.5s;">scope: clean</span>
+    <span class="tok" style="left:3%; top:78%; animation-duration:15s; animation-delay:5s;">/document --visual</span>
+    <span class="tok" style="left:60%; top:36%; animation-duration:20s; animation-delay:0.5s;">compounding++</span>
+    <span class="tok" style="left:40%; top:50%; animation-duration:17s; animation-delay:3.5s;">opt-in</span>
+  </div>
+
+  <div class="wrap inner">
+    <span class="ey-badge"><span class="dot"></span>Claude Code · plugin · lean</span>
+
+    <h1>
+      <span data-show="ko">에이전트는 세션이 끝나면 다 잊어버려요.<br><span class="grad">Nova는 안 잊게 만들어요.</span></span>
+      <span data-show="en">When a session ends, the agent forgets everything.<br><span class="grad">Nova makes it stick.</span></span>
+    </h1>
+
+    <p class="lead">
+      <span data-show="ko"><a href="https://docs.claude.com/en/docs/claude-code">Claude Code</a>에 설치하면 되는 가벼운 플러그인 하나예요.<br>코딩 세션을 에이전트가 다음에 다시 쓸 재료로 남기는 <b>loop 다섯 개</b>로 돌아가요.</span>
+      <span data-show="en">A single lightweight <a href="https://docs.claude.com/en/docs/claude-code">Claude Code</a> plugin.<br><b>Five loops</b> that keep each coding session as material the agent can build on next time.</span>
+    </p>
+    <p class="tags">
+      <span data-show="ko">정직하게, <b>git</b> 위에서, 거의 공짜로 돌아가요. 설치는 한 줄이고요.</span>
+      <span data-show="en">Honest, on top of <b>git</b>, almost free to run. One line to install.</span>
+    </p>
+
+    <div class="cta-row">
+      <a class="btn" href="#install">
+        <span data-show="ko">↓ 한 줄로 설치</span><span data-show="en">↓ Install in one line</span>
+      </a>
+      <a class="btn ghost" href="#gate">
+        <span data-show="ko">→ 정직성 게이트 보기</span><span data-show="en">→ See the honesty gate</span>
+      </a>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><div class="n" data-count="5">0</div><div class="l"><span data-show="ko">Loop</span><span data-show="en">Loops</span></div></div>
+      <div class="stat"><div class="n" data-count="5">0</div><div class="l"><span data-show="ko">커맨드</span><span data-show="en">Commands</span></div></div>
+      <div class="stat"><div class="n" data-count="1">0</div><div class="l"><span data-show="ko">플러그인</span><span data-show="en">Plugin</span></div></div>
+      <div class="stat"><div class="n"><em>0</em></div><div class="l"><span data-show="ko">내부 의존성</span><span data-show="en">Internal deps</span></div></div>
+    </div>
+
+    <div class="install-card">
+      <div class="term">
+        <div class="term-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">claude code</span></div>
+<pre class="code" id="install-cmd"><span class="c"># <span data-show="ko">한 줄로 전부, 다섯 loop 모두</span><span data-show="en">one install, all five loops</span></span>
+<span class="p">/plugin</span> marketplace add givepro91/nova
+<span class="p">/plugin</span> install nova@nova   <span class="g">✓ ready</span></pre>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ WHY (story §2) ============ -->
+<section class="block" id="why">
+  <div class="wrap read story reveal">
+    <p class="eyebrow"><span data-show="ko">왜 만들었나</span><span data-show="en">Why it exists</span></p>
+    <div class="sec-head">
+      <h2><span data-show="ko">무거운 건 내려놓고,<br>정직한 하나만 다시 지었어요</span><span data-show="en">We let go of the heavy thing,<br>and rebuilt one honest one</span></h2>
+    </div>
+
+    <p data-show="ko">예전 Nova는 훨씬 무거웠어요. Claude Code 위에 오케스트레이션과 품질 게이팅을 얹은 프레임워크였는데, 그 기능을 플랫폼이랑 주변 도구들이 따라잡아서 기본으로 해주기 시작했어요. 그러니 굳이 쓸 이유가 없어졌죠. 무게도 짐이 됐고요. 상태를 계속 갱신하느라 토큰을 먹고, 늘 켜져 있는 규칙들이 컨텍스트를 차지하고, 손도 많이 갔어요. 그래서 결국 안 쓰게 됐어요.</p>
+    <p data-show="en">The old Nova was a lot heavier. It put orchestration and quality-gating on top of Claude Code, and then the platform and the tools around it caught up and started doing that by default. There wasn't much reason to keep using it. The weight became its own cost: updating state ate tokens, always-on rules took up context, and it needed constant upkeep. So it ended up unused.</p>
+
+    <p data-show="ko">여기서 하나 배웠어요. <b>빠르게 크는 플랫폼 위에 무거운 걸 올리면, 플랫폼이 그 기능을 흡수하는 순간 끝이에요.</b> Nova가 못나서가 아니라 플랫폼이 좋아져서 생긴 일이고요. 딱히 숨길 일도 아니에요.</p>
+    <p data-show="en">One lesson stuck. <b>If you build something heavy on a fast-moving platform, the day it absorbs that feature, you're done.</b> It wasn't that Nova was bad; the platform just got good. Nothing to hide there.</p>
+
+    <div class="pull">
+      <span data-show="ko">그래서 인정하고 거의 다 버렸어요. <b>진짜 쓸모 있던 하나만 들고</b> 다시 만들었어요.</span>
+      <span data-show="en">So we admitted it and threw out almost everything. <b>We kept the one part that actually pulled its weight</b> and rebuilt around it.</span>
+    </div>
+    <p class="small muted" style="margin-top:20px">
+      <span data-show="ko">그 하나는, 만드는 쪽과 검사하는 쪽을 따로 둬서 실제로 런타임 버그를 잡아낸 방식이었어요. 지금 Nova는 그걸 중심에 두고 있어요.</span>
+      <span data-show="en">That one part kept the maker and the checker separate, and it caught real runtime bugs. Nova is built around it now.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ============ LOOPS (keeper not doer) ============ -->
+<section class="block alt" id="loops">
+  <div class="wrap reveal">
+    <p class="eyebrow"><span data-show="ko">무엇인가</span><span data-show="en">What it is</span></p>
+    <div class="sec-head">
+      <h2><span data-show="ko">에이전트를 대신 굴리진 않아요. <em>옆에서 챙겨요</em></span><span data-show="en">It doesn't run the agent. It <em>looks after</em> it</span></h2>
+      <p>
+        <span data-show="ko">일을 굴리는 건 플랫폼이랑 주변 도구들이 이미 잘해요. Nova는 거기 안 끼어들어요. 대신 에이전트 <b>옆에서</b> 규칙을 지키고, 배운 걸 남기고, 끊긴 작업을 잇고, 한 일을 검증하고 기록해요. 플랫폼이 안 챙기는 부분이죠. 플러그인 하나에 loop 다섯 개예요.</span>
+        <span data-show="en">Running the work is something the platform and its tooling already do well. Nova stays out of that. Instead it sits <b>next to</b> the agent and keeps the rules, saves what you taught it, carries unfinished work forward, and checks and records what got done. That's the part the platform doesn't cover. One plugin, five loops.</span>
+      </p>
+    </div>
+
+    <div class="loops">
+      <div class="loop">
+        <div class="top"><span class="role"><span data-show="ko">규칙</span><span data-show="en">Rules</span></span><code>/claude-md</code></div>
+        <p><span data-show="ko">CLAUDE.md에 작업 규율과 검증 방식, git 워크플로를 담는 관리 블록이에요. 몇 번을 다시 써도 한 벌만 깔끔하게 남아요.</span><span data-show="en">A managed block in CLAUDE.md that holds your working rules, how to verify, and the git workflow. Re-run it any number of times and it stays one clean copy.</span></p>
+      </div>
+      <div class="loop">
+        <div class="top"><span class="role"><span data-show="ko">학습</span><span data-show="en">Learning</span></span><code>/learn</code></div>
+        <p><span data-show="ko">한 번 고쳐준 걸 규칙 하나로 남겨요. 같은 실수를 다음 세션이 반복하지 않게요.</span><span data-show="en">Turns one correction into one lasting rule, so the next session doesn't repeat the same mistake.</span></p>
+      </div>
+      <div class="loop">
+        <div class="top"><span class="role"><span data-show="ko">연속성</span><span data-show="en">Continuity</span></span><code>/handoff</code></div>
+        <p><span data-show="ko">브랜치마다 핸드오프 메모를 git에 남겨요(SessionStart·PreCompact·Stop 훅). 세션이 끊겨도 다음이 그대로 이어받아요.</span><span data-show="en">Leaves a per-branch handoff note in git (SessionStart, PreCompact, Stop hooks). A fresh session picks up exactly where you stopped.</span></p>
+      </div>
+      <div class="loop">
+        <div class="top"><span class="role"><span data-show="ko">검증</span><span data-show="en">Verification</span></span><code>/gate</code></div>
+        <p><span data-show="ko">완료라고 말한 걸 독립 검증자가 다시 봐요. 진짜 했는지, 테스트는 돌렸는지, 시킨 것만 했는지 <b>증거</b>로 확인해요.</span><span data-show="en">An independent verifier re-checks what you called done. Did it really happen, did the tests actually run, did you stick to what was asked — against the <b>evidence</b>.</span></p>
+      </div>
+      <div class="loop wide">
+        <div class="top"><span class="role"><span data-show="ko">기록</span><span data-show="en">Record</span></span><code>/document</code></div>
+        <p><span data-show="ko">세션을 정리한 worklog를 남겨요. 원하면 Nova 톤의 단독 HTML로도 뽑고요. 한 일이 그냥 사라지지 않아요.</span><span data-show="en">Leaves a worklog that sums up the session, and if you want, a standalone HTML in Nova's style. What you did doesn't just vanish.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GATE SPOTLIGHT (the niche) ============ -->
+<section class="block" id="gate">
+  <div class="wrap reveal">
+    <div class="spot">
+      <p class="eyebrow" style="color:var(--violet-ink)"><span data-show="ko">핵심</span><span data-show="en">The core</span></p>
+      <h2><span data-show="ko">"다 됐다"고 할 때, 진짜일까</span><span data-show="en">When the agent says "done," is it really?</span></h2>
+      <p style="color:var(--ink-2); max-width:660px">
+        <span data-show="ko">에이전트가 적당히 건너뛰고 "다 했다"고 말할 때가 있어요. 맡기는 일이 많아질수록 이게 더 문제가 되고요. 그런데 <b>플랫폼이 자기 에이전트의 보고를 의심하는 기능을 직접 넣어줄 리는 없어요.</b> 그 자리를 Nova가 맡습니다.</span>
+        <span data-show="en">Sometimes an agent skips a step and still reports it as done. The more you hand off to it, the more this matters. And <b>a platform isn't going to ship a feature that doubts its own agent's word.</b> Nova takes that job.</span>
+      </p>
+      <div class="qs">
+        <div class="q"><span class="x">?</span><span><b><span data-show="ko">테스트, 진짜 돌렸어요?</span><span data-show="en">Did you really run the tests?</span></b> <span class="muted"><span data-show="ko">말만 한 건지, 출력이 있는지.</span><span data-show="en">— a claim, or actual output.</span></span></span></div>
+        <div class="q"><span class="x">?</span><span><b><span data-show="ko">시킨 범위는 지켰어요?</span><span data-show="en">Did you stay in scope?</span></b> <span class="muted"><span data-show="ko">요청 밖을 건드린 건 없는지.</span><span data-show="en">— or touch what wasn't asked.</span></span></span></div>
+        <div class="q"><span class="x">?</span><span><b><span data-show="ko">검증 안 한 걸 done으로 포장했어요?</span><span data-show="en">Was the unverified dressed up as done?</span></b> <span class="muted"><span data-show="ko">증거 없는 완료 선언인지.</span><span data-show="en">— a completion claim with no evidence.</span></span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEMO terminal ============ -->
+<section class="block alt" id="demo">
+  <div class="wrap read reveal">
+    <p class="eyebrow"><span data-show="ko">데모</span><span data-show="en">Demo</span></p>
+    <div class="sec-head">
+      <h2><span data-show="ko">claim → evidence, 실제 한 번</span><span data-show="en">claim → evidence, for real</span></h2>
+      <p><span data-show="ko">검증자를 따로 띄워서, 세션이 한 말을 실제 git diff랑 파일, 테스트 결과에 맞춰봐요. 코드 diff만 봐서는 안 보이는 게 여기서 걸려요.</span><span data-show="en">It spins up a separate verifier that checks what the session claimed against the real git diff, the files, and the test output. Things a diff-only review misses show up here.</span></p>
+    </div>
+
+    <div class="term">
+      <div class="term-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">/gate · independent verifier</span></div>
+<pre class="code"><span class="p">&gt; /gate</span>
+<span class="c"># <span data-show="ko">세션의 완료 주장을 증거에 대조 중…</span><span data-show="en">auditing the session's completion claims against evidence…</span></span>
+
+<span class="d">claim 1</span>  "<span data-show="ko">로그인 버그 고침</span><span data-show="en">fixed the login bug</span>"          <span class="g">✓ <span data-show="ko">증거: auth.ts:42 diff 일치</span><span data-show="en">evidence: auth.ts:42 diff matches</span></span>
+<span class="d">claim 2</span>  "<span data-show="ko">테스트 통과</span><span data-show="en">tests pass</span>"               <span class="r">✗ <span data-show="ko">증거 없음 — 실행 출력이 transcript에 없음</span><span data-show="en">no evidence — no run output in transcript</span></span>
+<span class="d">claim 3</span>  "<span data-show="ko">그 파일만 건드림</span><span data-show="en">only touched that file</span>"        <span class="r">✗ <span data-show="ko">범위 이탈 — config.ts 도 수정됨</span><span data-show="en">scope drift — config.ts also modified</span></span>
+
+<span class="p">verdict</span>  <span class="r">NOT DONE</span> · <span class="d"><span data-show="ko">3건 중 2건 미검증. critical → 2라운드 재감사.</span><span data-show="en">2 of 3 unverified. critical → re-audit, round 2.</span></span></pre>
+    </div>
+    <p class="small muted" style="margin-top:14px; text-align:center">
+      <span data-show="ko">예시 출력이에요. 실제 <code>/gate</code>는 세션 안에서 전체 맥락을 보고 진짜 git diff와 파일, 테스트 결과를 읽어요.</span>
+      <span data-show="en">Sample output. The real <code>/gate</code> runs inside the session with full context, reading the actual git diff, files, and test results.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ============ COEXIST ============ -->
+<section class="block" id="coexist">
+  <div class="wrap reveal">
+    <p class="eyebrow"><span data-show="ko">공존</span><span data-show="en">Coexist</span></p>
+    <div class="sec-head">
+      <h2><span data-show="ko">오케스트레이터를 바꾸지 않아도 돼요</span><span data-show="en">You don't have to change your orchestrator</span></h2>
+      <p><span data-show="ko">Nova는 일을 직접 굴리지 않아요. Auto Mode를 쓰든, 서브에이전트를 쓰든, omc를 쓰든, Nova는 그 <b>옆에</b> 얹혀서 돌아가요. 쓰던 걸 바꿀 필요가 없어요.</span><span data-show="en">Nova doesn't run the work itself. Whether you use Auto Mode, subagents, or omc, Nova just runs <b>alongside</b> it. You don't have to switch anything you already use.</span></p>
+    </div>
+    <div class="triad">
+      <div class="card">
+        <div class="tag"><span data-show="ko">플랫폼</span><span data-show="en">Platform</span></div>
+        <h3>Claude Code</h3>
+        <p><span data-show="ko">에이전트랑 도구, 서브에이전트를 실제로 돌리는 바탕이에요.</span><span data-show="en">Runs the agent, the tools, the subagents. The base it all sits on.</span></p>
+      </div>
+      <div class="card">
+        <div class="tag"><span data-show="ko">오케스트레이션</span><span data-show="en">Orchestration</span></div>
+        <h3><span data-show="ko">당신의 선택</span><span data-show="en">Your choice</span></h3>
+        <p><span data-show="ko">Auto Mode, omc, 아니면 직접. 일을 굴리는 쪽이에요.</span><span data-show="en">Auto Mode, omc, or by hand. Whatever runs the work.</span></p>
+      </div>
+      <div class="card you">
+        <div class="tag">Nova</div>
+        <h3><span data-show="ko">keeper 레이어</span><span data-show="en">The keeper layer</span></h3>
+        <p><span data-show="ko">규칙, 학습, 연속성, 검증, 기록. 위에 뭘 쓰든 같이 돌아가요.</span><span data-show="en">Rules, learning, continuity, verification, record. Runs with any of the above.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY GOOD (compact) ============ -->
+<section class="block alt" id="why-good">
+  <div class="wrap reveal">
+    <p class="eyebrow"><span data-show="ko">왜 좋은가</span><span data-show="en">Why it's good</span></p>
+    <div class="sec-head"><h2><span data-show="ko">네 가지 이유</span><span data-show="en">Four reasons</span></h2></div>
+    <div class="why">
+      <div class="item">
+        <h3><span class="n">01</span> <span data-show="ko">매번 리셋되지 않아요</span><span data-show="en">Nothing resets</span></h3>
+        <p><span data-show="ko">이번 세션에서 고친 것, 못 끝낸 것, 검증한 것, 한 일이 다음 세션으로 넘어가요. 매번 처음부터 다시 하지 않아요.</span><span data-show="en">What you fixed, what you didn't finish, what you verified, what you did — it all carries into the next session. You don't start over each time.</span></p>
+      </div>
+      <div class="item">
+        <h3><span class="n">02</span> <span data-show="ko">흡수 안 되는 정직성 게이트</span><span data-show="en">An honesty gate they can't copy</span></h3>
+        <p><span data-show="ko">맡기는 일이 많아질수록 쓸모가 커져요. 그리고 플랫폼은 자기 에이전트를 의심하는 기능을 스스로 넣기 어렵고요.</span><span data-show="en">It gets more useful the more you hand off. And a platform isn't well placed to build something that doubts its own agent.</span></p>
+      </div>
+      <div class="item">
+        <h3><span class="n">03</span> <span data-show="ko">가볍고, 거의 공짜</span><span data-show="en">Lean, almost free</span></h3>
+        <p><span data-show="ko">플러그인 하나에 훅은 전부 직접 켜는 방식이에요. 안 켜면 아무것도 안 해요.</span><span data-show="en">One plugin, and every hook is something you switch on yourself. Leave it off and it does nothing.</span></p>
+      </div>
+      <div class="item">
+        <h3><span class="n">04</span> <span data-show="ko">스스로 점검해요</span><span data-show="en">It checks itself</span></h3>
+        <p><span data-show="ko">만들면서 codex와 공식 문서, 코드리뷰로 검증받았어요. 그리고 Nova 자신의 <code>/gate</code>로 스스로를 점검해요.</span><span data-show="en">It was checked against codex, the official docs, and code review while being built. And it runs its own <code>/gate</code> on itself.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INSTALL ============ -->
+<section class="block" id="install">
+  <div class="wrap read reveal">
+    <p class="eyebrow"><span data-show="ko">시작하기</span><span data-show="en">Get started</span></p>
+    <div class="sec-head">
+      <h2><span data-show="ko">한 줄로 전부</span><span data-show="en">One line, everything</span></h2>
+      <p><span data-show="ko">다섯 loop이 플러그인 하나에 다 들어 있어요. 훅은 직접 켜기 전까지 조용하고요.</span><span data-show="en">All five loops sit in one plugin. The hooks stay quiet until you turn them on.</span></p>
+    </div>
+
+    <div class="install-card" style="max-width:none; margin:0">
+      <div class="term">
+        <div class="term-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">claude code</span></div>
+<pre class="code" id="install-cmd-2"><span class="c"># <span data-show="ko">다섯 loop 전부 설치</span><span data-show="en">install all five loops</span></span>
+<span class="p">/plugin</span> marketplace add givepro91/nova
+<span class="p">/plugin</span> install nova@nova</pre>
+      </div>
+    </div>
+
+    <ul class="facts">
+      <li><span data-show="ko">커맨드 5개: <code>/claude-md</code> · <code>/learn</code> · <code>/handoff</code> · <code>/gate</code> · <code>/document</code>.</span><span data-show="en">Five commands: <code>/claude-md</code> · <code>/learn</code> · <code>/handoff</code> · <code>/gate</code> · <code>/document</code>.</span></li>
+      <li><span data-show="ko">훅은 프로젝트별로 켜요. <code>docs/handoff/</code>가 있으면 handoff가, <code>.nova/gate.on</code>이 있으면 gate 넛지가 돌아요. 켜기 전엔 아무것도 안 떠요.</span><span data-show="en">Hooks are opt-in per project — <code>docs/handoff/</code> activates handoff, <code>.nova/gate.on</code> activates the gate nudge. Nothing fires until you opt in.</span></li>
+      <li><span data-show="ko">기존 <code>cc-skills</code>랑 <code>cc-handoff</code>를 합쳐서 대체해요(둘은 Nova를 가리키는 deprecation 배너만 남아요).</span><span data-show="en">Consolidates and replaces the standalone <code>cc-skills</code> and <code>cc-handoff</code> (both now point here via a deprecation banner).</span></li>
+      <li><span data-show="ko">semver + GitHub Releases · 현재 <b>v0.2.0</b> · 내부 도구 <b>0 의존</b> · MIT.</span><span data-show="en">semver + GitHub Releases · currently <b>v0.2.0</b> · <b>zero</b> internal dependencies · MIT.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="block alt" id="faq">
+  <div class="wrap read reveal">
+    <p class="eyebrow">FAQ</p>
+    <div class="sec-head"><h2><span data-show="ko">자주 묻는 질문</span><span data-show="en">Frequently asked</span></h2></div>
+    <div class="faq">
+      <details class="qa">
+        <summary><span data-show="ko">이게 예전 "AI Agent Ops Framework" Nova인가요?</span><span data-show="en">Is this the old "AI Agent Ops Framework" Nova?</span></summary>
+        <div class="a"><span data-show="ko">아니요. 이름만 같지 사실상 <b>다른 물건</b>이에요. 그건 무겁고 큰 프레임워크였고, 이건 가벼운 플러그인 하나입니다. 레포도 방향도 다릅니다.</span><span data-show="en">No. Same name, but really a <b>different thing</b>. That was a big, heavy framework; this is one lightweight plugin. Different repo, different direction.</span></div>
+      </details>
+      <details class="qa">
+        <summary><span data-show="ko">느려지지 않나요? 컨텍스트 세금은요?</span><span data-show="en">Will it slow me down? What about context-tax?</span></summary>
+        <div class="a"><span data-show="ko">훅을 직접 켜기 전까지는 아무것도 안 돌아가요. 커맨드도 필요할 때만 부르면 됩니다. 늘 켜져서 무거워지는 일이 없어요.</span><span data-show="en">Nothing runs until you switch a hook on yourself. Commands only fire when you call them. There's nothing sitting in the background weighing things down.</span></div>
+      </details>
+      <details class="qa">
+        <summary><span data-show="ko">멀티 에이전트 오케스트레이션도 하나요?</span><span data-show="en">Does it do multi-agent orchestration?</span></summary>
+        <div class="a"><span data-show="ko">안 합니다. 그건 플랫폼이랑 omc가 하는 일이에요. Nova는 일부러 거기 안 들어갑니다. 에이전트가 일하는 동안 <b>옆에서</b> 규칙이랑 기록, 검증을 챙기는 쪽이에요.</span><span data-show="en">It doesn't. That's what the platform and omc are for. Nova deliberately stays out of it, and works <b>alongside</b> the agent instead — keeping the rules, the records, and the checks.</span></div>
+      </details>
+      <details class="qa">
+        <summary><span data-show="ko">회사 내부 도구나 서버가 필요한가요?</span><span data-show="en">Does it need internal tools or a server?</span></summary>
+        <div class="a"><span data-show="ko">아니요. 회사 내부 도구 같은 건 <b>하나도 안 씁니다.</b> git만 있으면 되고, 뽑아내는 결과물(worklog HTML 등)도 외부 의존 없이 그 파일 하나로 열려요.</span><span data-show="en">No. It uses <b>none</b> of that. All it needs is git, and the things it produces (like the worklog HTML) open as a single file with nothing external to load.</span></div>
+      </details>
+      <details class="qa">
+        <summary><span data-show="ko">계속 업데이트되나요?</span><span data-show="en">Is it still updated?</span></summary>
+        <div class="a"><span data-show="ko">네, 대신 가볍게요. 플랫폼이 바뀌거나 고칠 게 생겼을 때만 <code>/nova-dev</code>로 손봐요. 스캐너나 cron으로 자동으로 막 돌리는 건 없앴어요.</span><span data-show="en">Yes, but lean. A single one-sitting loop, <code>/nova-dev</code>, updates it only when the platform shifts or there's a concrete improvement. No heavy auto-evolution (scanners, cron).</span></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="links">
+      <a href="https://github.com/givepro91/nova" target="_blank" rel="noopener">GitHub — givepro91/nova</a>
+      <a href="https://github.com/givepro91/nova/releases" target="_blank" rel="noopener">Releases</a>
+      <a href="https://docs.claude.com/en/docs/claude-code" target="_blank" rel="noopener">Claude Code</a>
+    </div>
+    <p class="small" style="margin:0">MIT © 2026 · Nova — a compounding-agent nervous system for Claude Code.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var body = document.body;
+  var btnKo = document.getElementById('btn-ko');
+  var btnEn = document.getElementById('btn-en');
+
+  function setLang(lang) {
+    if (lang !== 'en') lang = 'ko';
+    body.setAttribute('data-lang', lang);
+    document.documentElement.setAttribute('lang', lang);
+    btnKo.setAttribute('aria-pressed', String(lang === 'ko'));
+    btnEn.setAttribute('aria-pressed', String(lang === 'en'));
+    try { localStorage.setItem('nova-lang', lang); } catch (e) {}
+  }
+  var saved; try { saved = localStorage.getItem('nova-lang'); } catch (e) {}
+  setLang(saved || 'ko');
+  btnKo.addEventListener('click', function () { setLang('ko'); });
+  btnEn.addEventListener('click', function () { setLang('en'); });
+
+  // nav background on scroll
+  var nav = document.getElementById('nav');
+  function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 12); }
+  onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+
+  // copy buttons
+  ['install-cmd', 'install-cmd-2'].forEach(function (id) {
+    var pre = document.getElementById(id);
+    if (!pre) return;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'copy';
+    btn.setAttribute('aria-label', 'Copy install commands');
+    btn.addEventListener('click', function () {
+      var text = '/plugin marketplace add givepro91/nova\n/plugin install nova@nova';
+      var done = function () { btn.textContent = 'copied'; setTimeout(function () { btn.textContent = 'copy'; }, 1400); };
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, done); }
+      else { done(); }
+    });
+    pre.parentNode.style.position = 'relative';
+    pre.parentNode.appendChild(btn);
+  });
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // reveal on scroll
+  var reveals = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    reveals.forEach(function (el) { io.observe(el); });
+  }
+
+  // stat count-up
+  function countUp(el) {
+    var target = parseInt(el.getAttribute('data-count'), 10) || 0;
+    if (reduce || target === 0) { el.textContent = String(target); return; }
+    var start = null, dur = 850;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      el.textContent = String(Math.round(p * target));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  var statsEl = document.getElementById('stats');
+  var nums = statsEl.querySelectorAll('.n[data-count]');
+  if (reduce || !('IntersectionObserver' in window)) {
+    nums.forEach(countUp);
+  } else {
+    var sio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { nums.forEach(countUp); sio.disconnect(); } });
+    }, { threshold: 0.4 });
+    sio.observe(statsEl);
+  }
+
+  // active nav link
+  var navLinks = document.querySelectorAll('.nav-links a');
+  var linkFor = {};
+  navLinks.forEach(function (a) {
+    var id = a.getAttribute('href').slice(1);
+    (linkFor[id] = linkFor[id] || []).push(a);
+  });
+  if ('IntersectionObserver' in window) {
+    var nio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          navLinks.forEach(function (a) { a.classList.remove('active'); });
+          (linkFor[e.target.id] || []).forEach(function (a) { a.classList.add('active'); });
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    document.querySelectorAll('section[id]').forEach(function (s) { nio.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
