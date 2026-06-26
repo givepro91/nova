@@ -11,6 +11,11 @@
       "name": "handoff",
       "source": "./plugins/handoff",
       "description": "Hook-enforced, branch-aware, ephemeral session handoff — auto-preserves open work to a per-branch, git-tracked docs/handoff/<branch>.md (status active|blocked, + derived board) so parallel branches/worktrees never collide; resolve deletes finished handoffs and prune clears merged/orphaned ones. The next session, even on another machine, continues seamlessly."
+    },
+    {
+      "name": "nova-gate",
+      "source": "./plugins/nova-gate",
+      "description": "Adversarial completion-honesty gate — /gate spawns an independent verifier (separate context) that maps a session's completion claims to evidence (were the tests actually run? was scope kept? is anything unverified passed off as done?). Manual by default (zero context tax); opt-in Stop nudge via .nova/gate.on. Writes a verdict ledger that worklog consumes."
     }
   ]
 }
