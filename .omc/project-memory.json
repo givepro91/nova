@@ -1,0 +1,55 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1782452759381,
+  "projectRoot": "/Users/jay/develop/givepro91/nova",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "tests"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "plugins": {
+      "path": "plugins",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1782452759360,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 3,
+      "lastAccessed": 1782452759366,
+      "keyFiles": [
+        "gate-verify.sh",
+        "inc15-verify.sh",
+        "worklog-verify.sh"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

@@ -3,11 +3,11 @@
 # Run: bash tests/gate-verify.sh
 set -u
 NOVA="$(cd "$(dirname "$0")/.." && pwd)"
-NUDGE="$NOVA/plugins/nova-gate/hooks/nudge.mjs"
+NUDGE="$NOVA/plugins/nova/hooks/nudge.mjs"
 fail() { echo "FAIL: $1"; exit 1; }
 
 echo "== node --check =="
-node --check "$NOVA/plugins/nova-gate/hooks/_lib.mjs" || fail "syntax _lib"
+node --check "$NOVA/plugins/nova/hooks/_lib.mjs" || fail "syntax _lib"
 node --check "$NUDGE" || fail "syntax nudge"
 echo "  ok"
 

@@ -1,6 +1,6 @@
 # Nova — dev instructions
 
-Nova is a **compounding-agent nervous system** for Claude Code, shipped as a modular plugin marketplace. Each plugin is one *loop* over a coding session (rules · learning · continuity · verification · record). It replaces the standalone `cc-skills` + `cc-handoff` repos (consolidated here; those are deprecated and point here).
+Nova is a **compounding-agent nervous system** for Claude Code, shipped as a single plugin (`nova`) in a marketplace. Five *loops* over a coding session (rules · learning · continuity · verification · record) as five skills + shared hooks. It replaces the standalone `cc-skills` + `cc-handoff` repos (consolidated here; deprecated, pointing here).
 
 > User-facing language: respond to the user in **Korean**.
 
@@ -8,14 +8,15 @@ Nova is a **compounding-agent nervous system** for Claude Code, shipped as a mod
 
 The session is raw material. Honest, git-native, low-context-tax loops let the agent compound across sessions instead of resetting. Nova is a **keeper** (state/rules/records around the agent), not a **doer** (orchestration) — orchestration is owned by the platform + omc; Nova lives in the layer they don't.
 
-## The 5 loops → 4 plugins
+## The 5 loops → 1 plugin (`nova`)
 
-- `claude-md` — **Rules** (`/claude-md`, idempotent managed block) + **Learning** (`/learn`, correction→rule). Absorbed from cc-skills.
-- `handoff` — **Continuity**. Per-branch ephemeral handoff + 3 hooks (Stop/PreCompact/SessionStart). Absorbed from cc-handoff.
-- `nova-gate` — **Verification** (NEW). See decisions below.
-- `worklog` — **Record** (NEW). See decisions below.
+One plugin, five skills + shared hooks (`plugins/nova/{skills/*, scripts/*, hooks/*}`):
+- `/claude-md` — **Rules** (idempotent managed block) + `/learn` — **Learning** (correction→rule). Absorbed from cc-skills.
+- `/handoff` — **Continuity**. Per-branch ephemeral handoff + hooks (SessionStart/PreCompact/Stop). Absorbed from cc-handoff.
+- `/gate` — **Verification** (NEW). Independent claim→evidence verifier + opt-in Stop nudge.
+- `/document` — **Record** (NEW). Synthesized worklog + deterministic `--visual` HTML.
 
-Plugins are **independently installable** — no cross-plugin imports. Reason: context tax (a plugin's metadata is always loaded). Don't monolith.
+handoff + gate **share one `hooks/_lib.mjs`** (the monolith removed the cross-plugin barrier → no duplicated lib). All hooks opt-in per project (`docs/handoff/`, `.nova/gate.on`).
 
 ## Locked decisions (with why)
 
@@ -26,6 +27,7 @@ Plugins are **independently installable** — no cross-plugin imports. Reason: c
 5. **worklog**: `--visual` is a **deterministic render of the .md** (no LLM rewrite that drifts/optimizes); **verdict badges only from real gate evidence** (a JSON ledger), never fabricated. `/document` is manual (zero tax). Visual = self-contained HTML (inline CSS, no external assets), light theme + Nova violet.
 6. **No company-internal dependencies** — never depend on `doc-publish`, `swk-wiki`, `secret-manage`, etc. Nova is a public, portable artifact; plugin users don't have those. All output self-contained.
 7. **Market differentiation** = a **raw-transcript claim-evidence audit artifact**, not generic "verify before done" (the platform will absorb the generic version).
+8. **Single plugin, not 4 (B over A) — v0.2.0.** Started modular (4 plugins) for context-tax avoidance, then verified (official docs) that a monolith has **LESS** always-on cost (1 plugin metadata vs 4) and that all nova hooks are opt-in markers anyway — so the split's justification didn't hold. Nova's loops are also one *designed system* (gate routes to learn/handoff/worklog; worklog reads gate's ledger). So: one `nova` plugin, five skills; `/plugin install nova@nova` = everything (no meta-plugin band-aid). Trade-off: no per-loop uninstall — acceptable (loops are a system; unused ones stay silent via opt-in hooks). Officially-backed alternative considered: `plugin.json` `dependencies` (a meta-plugin auto-installing the 4) — rejected as a band-aid that keeps the unjustified split + adds a 5th metadata entry.
 
 ## Brand
 
@@ -33,7 +35,7 @@ Violet: `#7c3aed` (primary) · `#a855f7` (light) · `#6d28d9` (deep). Light them
 
 ## Inc 1.5 — absorbed-code bug fixes (from /code-review)
 
-Fixes live in each plugin's own files (no cross-plugin shared lib — independent-install rule). nova-gate will copy the hardened patterns. **Verified by `tests/inc15-verify.sh` (ALL PASS).**
+Fixes live in `plugins/nova/{hooks,scripts}`; since v0.2.0 (monolith) handoff + gate share one hardened `hooks/_lib.mjs`. **Verified by `tests/inc15-verify.sh` (ALL PASS).**
 
 **Fixed ✅**
 - `handoff/hooks/_lib.mjs` `changedFiles` — non-ASCII (Korean) paths were octal-quoted by `core.quotepath` → now `-c core.quotepath=false`. *(verified: `한글파일.md` returned literally)*
@@ -55,8 +57,8 @@ This design passed: codex gpt-5.5 ×2 (general + adversarial), claude-code-guide
 ## Build & test
 
 ```sh
-node --check plugins/**/*.mjs                 # syntax
-# install locally to test:  /plugin marketplace add /Users/jay/develop/givepro91/nova
+bash tests/inc15-verify.sh && bash tests/gate-verify.sh && bash tests/worklog-verify.sh   # all green
+# install locally:  /plugin marketplace add /Users/jay/develop/givepro91/nova  →  /plugin install nova@nova
 ```
 
 ## Git

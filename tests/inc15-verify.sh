@@ -3,14 +3,14 @@
 # Run: bash tests/inc15-verify.sh
 set -u
 NOVA="$(cd "$(dirname "$0")/.." && pwd)"
-LIB="$NOVA/plugins/handoff/hooks/_lib.mjs"
-APPEND="$NOVA/plugins/claude-md/scripts/append-rule.mjs"
-APPLY="$NOVA/plugins/claude-md/scripts/apply-block.mjs"
+LIB="$NOVA/plugins/nova/hooks/_lib.mjs"
+APPEND="$NOVA/plugins/nova/scripts/append-rule.mjs"
+APPLY="$NOVA/plugins/nova/scripts/apply-block.mjs"
 T=$(mktemp -d)
 fail() { echo "FAIL: $1"; exit 1; }
 
 echo "== node --check =="
-for f in "$NOVA"/plugins/handoff/hooks/*.mjs "$NOVA"/plugins/claude-md/scripts/*.mjs; do
+for f in "$NOVA"/plugins/nova/hooks/*.mjs "$NOVA"/plugins/nova/scripts/*.mjs; do
   node --check "$f" || fail "syntax $f"; done
 echo "  ok"
 

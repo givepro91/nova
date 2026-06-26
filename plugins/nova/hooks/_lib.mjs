@@ -132,3 +132,9 @@ export function resolveHandoff(dir, { migrate = false } = {}) {
 }
 
 export function output(obj) { process.stdout.write(JSON.stringify(obj)); }
+
+/** nova-gate Stop-nudge opt-in: enabled only when .nova/gate.on exists and not globally disabled. */
+export function enforceOn(dir) {
+  if (process.env.NOVA_GATE_ENFORCE === '0') return false;
+  return existsSync(join(dir, '.nova', 'gate.on'));
+}

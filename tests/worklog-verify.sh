@@ -3,7 +3,7 @@
 # Run: bash tests/worklog-verify.sh
 set -u
 NOVA="$(cd "$(dirname "$0")/.." && pwd)"
-R="$NOVA/plugins/worklog/scripts/render.mjs"
+R="$NOVA/plugins/nova/scripts/render.mjs"
 T=$(mktemp -d)
 fail() { echo "FAIL: $1"; exit 1; }
 has() { grep -qF "$1" "$2" || fail "missing: $1"; }

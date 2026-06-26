@@ -2,29 +2,26 @@
 
 > A compounding-agent nervous system for [Claude Code](https://docs.claude.com/en/docs/claude-code).
 
-Nova is a small, **modular** plugin marketplace. Each plugin is one **loop** that turns a coding session into raw material the agent learns from — so it doesn't reset every session, it **compounds**. Honest, git-native, low context-tax. Install only the loops you want.
+Nova is a single Claude Code **plugin** — five **loops** that turn each coding session into raw material the agent learns from, so it doesn't reset every session, it **compounds**. Honest, git-native, low context-tax. One install; every hook is opt-in per project.
 
 ## The loops
 
-| Loop | Plugin | What it does | Status |
-|------|--------|--------------|--------|
-| **Rules** | `claude-md` | Idempotent managed CLAUDE.md block — working discipline, verification, adaptive parallel-git workflow | ✅ |
-| **Learning** | `claude-md` (`/learn`) | A correction → one durable rule (deduped). Compounding engineering | ✅ |
-| **Continuity** | `handoff` | Per-branch, ephemeral, git-tracked handoff (Stop / PreCompact / SessionStart hooks) so the next session continues | ✅ |
-| **Verification** | `nova-gate` | Adversarial completion-honesty audit — an independent verifier maps the session's *claims* to *evidence* (did you really do it, run the tests, stay in scope?) | ✅ |
-| **Record** | `worklog` | A synthesized session narrative (`/document`), optional self-contained visual HTML | ✅ |
+| Loop | Command | What it does |
+|------|---------|--------------|
+| **Rules** | `/claude-md` | Idempotent managed CLAUDE.md block — working discipline, verification, adaptive parallel-git workflow |
+| **Learning** | `/learn` | A correction → one durable rule (deduped). Compounding engineering |
+| **Continuity** | `/handoff` | Per-branch, ephemeral, git-tracked handoff (SessionStart / PreCompact / Stop hooks) so the next session continues |
+| **Verification** | `/gate` | Adversarial completion-honesty audit — an independent verifier maps the session's *claims* to *evidence* (did you really do it, run the tests, stay in scope?) |
+| **Record** | `/document` | A synthesized session narrative, optional self-contained Nova-branded HTML |
 
 ## Install
 
 ```sh
 /plugin marketplace add givepro91/nova
-/plugin install claude-md@nova      # rules + learning
-/plugin install handoff@nova        # continuity
-/plugin install nova-gate@nova      # completion-honesty audit (/gate)
-/plugin install worklog@nova        # session worklog (/document)
+/plugin install nova@nova       # one install — all five loops
 ```
 
-> Keep your active plugin set small — every plugin's metadata is always loaded into context. Install the loops you actually use.
+> One plugin, five skills. Every hook is **opt-in per project** — `docs/handoff/` activates handoff, `.nova/gate.on` activates the gate nudge. Nothing fires until you opt in, so it stays low-tax.
 
 ## Supersedes
 
