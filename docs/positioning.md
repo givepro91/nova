@@ -56,7 +56,7 @@
 ## 5. 계속 업데이트되나 — 그렇다, 단 lean하게
 
 - **유지·진화된다.** 단, v1식 무거운 자동진화(스캐너·ledger·cron)는 **버렸다.** `/nova-dev`라는 *한 자리(one-sitting) 루프*로, **실제 신호가 있을 때만**(Claude Code가 변하거나 구체적 개선거리가 있을 때) 갱신한다 — 스케줄 강박 없음.
-- semver + GitHub Releases. 현재 **v0.2.0**. 개인 프로젝트로 지속.
+- semver + GitHub Releases. 현재 **v0.2.1**. 개인 프로젝트로 지속.
 - 메시지: "작게, 그러나 살아있게 — 플랫폼이 변하면 따라가고, 아니면 가만히 둔다."
 
 ---
@@ -71,7 +71,7 @@
 
 ## 7. 팩트 / 링크 (정확히)
 
-- Repo: `github.com/givepro91/nova` (public) · 현재 **v0.2.0**.
+- Repo: `github.com/givepro91/nova` (public) · 현재 **v0.2.1**.
 - 설치(한 줄로 전부):
   ```
   /plugin marketplace add givepro91/nova
