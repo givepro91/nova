@@ -1,3 +1,6 @@
 .DS_Store
 node_modules/
 *.log
+
+# OMC tooling state (session/HUD/project-memory) — machine-local, not source
+.omc/
