@@ -1,16 +1,16 @@
 # Nova — dev instructions
 
-Nova is a **compounding-agent nervous system** for Claude Code, shipped as a single plugin (`nova`) in a marketplace. Five *loops* over a coding session (rules · learning · continuity · verification · record) as five skills + shared hooks. It replaces the standalone `cc-skills` + `cc-handoff` repos (consolidated here; deprecated, pointing here).
+Nova is a **compounding-agent nervous system** for Claude Code, shipped as a single plugin (`nova`) in a marketplace. Five *loops* over a coding session (rules · learning · continuity · verification · record) as five loop skills + shared hooks. It replaces the standalone `cc-skills` + `cc-handoff` repos (consolidated here; deprecated, pointing here).
 
 > User-facing language: respond to the user in **Korean**.
 
 ## Design thesis
 
-The session is raw material. Honest, git-native, low-context-tax loops let the agent compound across sessions instead of resetting. Nova is a **keeper** (state/rules/records around the agent), not a **doer** (orchestration) — orchestration is owned by the platform + omc; Nova lives in the layer they don't.
+The session is raw material. Honest, git-native, low-context-tax loops let the agent compound across sessions instead of resetting. Nova is a **personal dev-assist plugin for Jay** — it stands on its own (no dependency on, or deference to, any orchestration layer such as omc or the platform), and its mission is simply *whatever compounds Jay's building across sessions*. Today that's five session loops (rules · learning · continuity · verification · record); the mission is **not limited to "keeping" state** — capabilities that help Jay build (e.g. discovering & designing where agents safely fit in a project) are equally Nova.
 
 ## The 5 loops → 1 plugin (`nova`)
 
-One plugin, five skills + shared hooks (`plugins/nova/{skills/*, scripts/*, hooks/*}`):
+One plugin, five session **loops** + shared hooks (`plugins/nova/{skills/*, scripts/*, hooks/*}`). Capabilities are **not** loops — `skills/*` now also holds capability skills (`scout`, `design-direction`) that help Jay build but don't run per-session; see README's Capabilities table.
 - `/claude-md` — **Rules** (idempotent managed block) + `/learn` — **Learning** (correction→rule). Absorbed from cc-skills.
 - `/handoff` — **Continuity**. Per-branch ephemeral handoff + hooks (SessionStart/PreCompact/Stop). Absorbed from cc-handoff.
 - `/gate` — **Verification** (NEW). Independent claim→evidence verifier + opt-in Stop nudge.

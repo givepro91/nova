@@ -14,14 +14,23 @@ Nova is a single Claude Code **plugin** — five **loops** that turn each coding
 | **Verification** | `/gate` | Adversarial completion-honesty audit — an independent verifier maps the session's *claims* to *evidence* (did you really do it, run the tests, stay in scope?) |
 | **Record** | `/document` | A synthesized session narrative, optional self-contained Nova-branded HTML |
 
+## Capabilities (loop이 아닌 스킬)
+
+| Capability | Command | What it does |
+|------------|---------|---------------|
+| **Discovery & Design** | `/scout` | 아무 프로젝트에서 "AI가 안전하게 *행동*할 자리"를 발굴·적합도 랭킹하고, 선택 후보를 safe-action-agent 설계 스펙으로 출력. 랭킹은 `.nova/` ledger로 compounding |
+| **Design Direction** | `/design-direction` | Settle vague aesthetic asks ("modern", "sleek") by rendering 2–4 real mockups and narrowing from the user's reactions, instead of guessing from adjectives |
+
+> Nova = "세션을 가로질러 개발을 복리로 돕는" 플러그인. 위 5 loops는 *세션* 위에서 돌고, capabilities는 loop이 아닌 도구다.
+
 ## Install
 
 ```sh
 /plugin marketplace add givepro91/nova
-/plugin install nova@nova       # one install — all five loops
+/plugin install nova@nova       # one install — everything
 ```
 
-> One plugin, five skills. Every hook is **opt-in per project** — `docs/handoff/` activates handoff, `.nova/gate.on` activates the gate nudge. Nothing fires until you opt in, so it stays low-tax.
+> One plugin: five loop skills + capability skills. Every hook is **opt-in per project** — `docs/handoff/` activates handoff, `.nova/gate.on` activates the gate nudge. Nothing fires until you opt in, so it stays low-tax.
 
 ## Supersedes
 
