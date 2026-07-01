@@ -4,3 +4,6 @@ node_modules/
 
 # OMC tooling state (session/HUD/project-memory) — machine-local, not source
 .omc/
+
+# Nova machine-state artifacts (ledgers/verdicts) — opt-in markers (.nova/*.on) stay committable
+.nova/*.json
