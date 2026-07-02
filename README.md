@@ -11,8 +11,8 @@ Nova is a single Claude Code **plugin** — five **loops** that turn each coding
 | **Rules** | `/claude-md` | Idempotent managed CLAUDE.md block — working discipline, verification, adaptive parallel-git workflow |
 | **Learning** | `/learn` | A correction → one durable rule (deduped). Compounding engineering |
 | **Continuity** | `/handoff` | Per-branch, ephemeral, git-tracked handoff (SessionStart / PreCompact / Stop hooks) so the next session continues |
-| **Verification** | `/gate` | Adversarial completion-honesty audit — an independent verifier maps the session's *claims* to *evidence* (did you really do it, run the tests, stay in scope?) |
-| **Record** | `/document` | A synthesized session narrative, optional self-contained Nova-branded HTML |
+| **Verification** | `/gate` | Adversarial completion-honesty audit — an independent verifier maps the session's *claims* to *evidence* (did you really do it, run the tests, stay in scope?). Opt-in hook records every Bash run to a machine-local evidence ledger the verifier audits against |
+| **Record** | `/document` | A synthesized session narrative (two-layer: plain-Korean TL;DR first, engineering record after) with a deterministic prose lint, optional self-contained Nova-branded HTML |
 
 ## Capabilities (loop이 아닌 스킬)
 
@@ -30,7 +30,7 @@ Nova is a single Claude Code **plugin** — five **loops** that turn each coding
 /plugin install nova@nova       # one install — everything
 ```
 
-> One plugin: five loop skills + capability skills. Every hook is **opt-in per project** — `docs/handoff/` activates handoff, `.nova/gate.on` activates the gate nudge. Nothing fires until you opt in, so it stays low-tax.
+> One plugin: five loop skills + capability skills. Every hook is **opt-in per project** — `docs/handoff/` activates handoff, `.nova/gate.on` activates the gate nudge + evidence recorder. Nothing fires until you opt in, so it stays low-tax.
 
 ## Supersedes
 

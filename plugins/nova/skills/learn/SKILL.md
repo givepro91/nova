@@ -1,10 +1,10 @@
 ---
 name: learn
-description: Capture a lesson from a mistake into CLAUDE.md's Self-Learning Rules so the same mistake isn't repeated. Distills the most recent correction into ONE concise, reusable rule and appends it (deduped). Use right after Claude does something wrong and the user corrects it, or when the user runs /learn.
-when_to_use: When the user runs /learn, or right after a correction ("no, don't…", "again", "that's wrong", "always/never do X") that should become a durable rule.
-argument-hint: "[rule text]"
+description: Capture a lesson from a mistake into CLAUDE.md's Self-Learning Rules so the same mistake isn't repeated. Distills the most recent correction into ONE concise, reusable rule and appends it (deduped). `/learn review` is the gardener — consolidates, generalizes, retires, and promotes accumulated rules so the list stays sharp instead of becoming noise. Use right after Claude does something wrong and the user corrects it, or when the user runs /learn.
+when_to_use: When the user runs /learn, or right after a correction ("no, don't…", "again", "that's wrong", "always/never do X") that should become a durable rule. /learn review when the rule list has grown stale or long.
+argument-hint: "[rule text | review]"
 disable-model-invocation: true
-allowed-tools: Read, Bash(git rev-parse*), Bash(node*), Bash(readlink*), Bash(grep*)
+allowed-tools: Read, Edit, Bash(git rev-parse*), Bash(node*), Bash(readlink*), Bash(grep*)
 ---
 
 # /learn — append a rule from a mistake
@@ -45,6 +45,21 @@ User (Korean): "스키마 바꾸기 전에 꼭 물어봐"
 rule: "Don't make mistakes." → too vague, not actionable.
 rule: "I broke the login test at 3pm." → a story, not a reusable rule.
 </bad>
+
+## Procedure — `review` (the gardener)
+
+A rule list that only grows becomes noise: every session pays its context tax, and stale or contradictory rules erode trust in all of them. `/learn review` prunes so the list stays worth loading.
+
+1. **Read the rules** under `<!-- LEARN:ANCHOR -->` in the canonical file (resolve as in step 1 above). If `.nova/gate-history.jsonl` exists, also read it — recurring gate findings are evidence of a *missing* rule; a finding that stopped recurring is evidence a rule is working.
+2. **Propose a gardening plan** (propose first — apply nothing yet):
+   - **Merge** near-duplicates into the sharper phrasing (keep the older date).
+   - **Generalize** 2–3 rules that are instances of one principle into that principle — only when the general form is still actionable, not a platitude.
+   - **Retire** rules that are obsolete (the tool/file/workflow they guard no longer exists — verify with grep, don't guess) or subsumed by a merged/general rule.
+   - **Promote** rules that aren't project-specific to the user's global CLAUDE.md — list them as suggestions; never write outside the repo yourself.
+   - **Missing rules** from gate history: "N of the last M gates flagged X" → propose a new rule via the normal append flow.
+3. **Show the plan as a table** (rule → action → why) and get explicit approval.
+4. **Apply** only the approved actions by editing between the anchor and the block end — never touch anything outside the Self-Learning Rules region. Keep `- (YYYY-MM-DD) ` line format; retired rules are deleted (git history keeps them), not commented out.
+5. **Report** the before/after count and offer to commit (don't commit without approval).
 
 ## Why a separate section + skill (not full automation)
 

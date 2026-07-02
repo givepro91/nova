@@ -4,7 +4,7 @@ description: Record the current session's decisions, reasoning, open work, and n
 when_to_use: When the user runs /handoff, when finishing a session, when work will continue on another machine, or when context is about to be compacted/reset.
 argument-hint: "[quick|blocked|status|resolve|prune]"
 disable-model-invocation: true
-allowed-tools: Read, Write, Edit, Glob, Bash(git status*), Bash(git log*), Bash(git diff --stat*), Bash(git rev-parse*), Bash(git branch*), Bash(git remote*), Bash(git fetch*), Bash(git rm*), Bash(mkdir -p*), Bash(rm -f docs/handoff/*)
+allowed-tools: Read, Write, Edit, Glob, Bash(git status*), Bash(git log*), Bash(git diff --stat*), Bash(git rev-parse*), Bash(git branch*), Bash(git remote*), Bash(git fetch*), Bash(git rm*), Bash(mkdir -p*), Bash(rm -f docs/handoff/*), Bash(node*)
 ---
 
 # /handoff — write a session handoff (branch-aware, ephemeral)
@@ -51,7 +51,8 @@ There is **no `closed` on disk** — terminal = the file is deleted (`/handoff r
 3. **Migrate legacy if needed**: if `docs/handoff/<slug>.md` is absent but a legacy `docs/handoff/HANDOFF.md` exists, base the new file on it (the SessionStart hook usually does this automatically).
 4. **Gather facts**: `git status --porcelain`, `git diff --stat`, `git log --oneline -5`; capture the linked issue/PR when known.
 5. **Write `docs/handoff/<slug>.md`** with the template below. Keep the YAML front-matter at the top, set `status` (`active`, or `blocked` for the `blocked` arg), refresh `updated`.
-6. Offer to commit (don't commit without approval).
+6. **Lint the prose**: `node "${CLAUDE_PLUGIN_ROOT}/scripts/lint-prose.mjs" docs/handoff/<slug>.md`. A "Restore in 30s" written in session shorthand (`→` chains, `·` runs, mega-paragraphs) defeats its own purpose — revise until `LINT: clean`.
+7. Offer to commit (don't commit without approval).
 
 ## Template
 
@@ -100,6 +101,7 @@ What you were doing / where you got to / what you just finished.
 1. The current branch's work is complete (e.g. merged or abandoned). **Delete** `docs/handoff/<slug>.md` (`git rm docs/handoff/<slug>.md` if tracked, else `rm -f`).
 2. The closure record is the commit message, not a lingering file — suggest a message like `chore(handoff): resolve <slug> (merged in #42)`.
 3. Offer to commit (don't commit without approval). Do **not** delete any other branch's file here.
+4. Resolve is the natural moment for the durable record: if the finished work was meaningful (multi-session, non-obvious decisions), suggest `/document` — the handoff dies here, but the *why* deserves to survive.
 
 ## Procedure — `prune` (clean up orphans)
 
