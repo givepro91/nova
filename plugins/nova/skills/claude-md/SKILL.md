@@ -91,13 +91,15 @@ For the plain CLAUDE.md-only case, no confirmation is needed.
 
 ## Parallel Git Workflow
 <!-- variant: TEAM (git + remote + gh) -->
-- Never work on or commit to the default branch (`main`/`master`). **One task = one ISSUE = one branch.**
-- **Create the branch/worktree BEFORE you start editing — not at commit time.** Isolate each task in its own **git worktree** (`git worktree add ../<task> -b <branch>`), or use your agent's native worktree support — **Claude Code provides worktrees** — so parallel sessions never share a checkout and never collide on `main`.
+- **Never edit, commit, or merge on the default branch (`main`/`master`) without explicit user approval.** Isolation is the default even for a single session. **One task = one ISSUE = one branch.**
+- **Create the branch/worktree BEFORE you start editing — not at commit time.** Isolate each task in its own **git worktree** (`git worktree add ../<task> -b <branch>`), or use your agent's native worktree support — **Claude Code provides worktrees** — so parallel sessions never share a checkout and never collide on `main`. Don't touch worktrees you didn't create (another session's, or tool-managed ones).
+- **Clean up when the work lands: once the branch is merged, remove its worktree and delete the branch in the same flow** (`git worktree remove <path>` + `git branch -d <branch>`) — never leave stale worktrees/branches behind.
 - Open small, surgical PRs that reference the issue (e.g. "Fixes #42"); keep one concern per PR.
 - If cc-handoff is installed: **one branch = one handoff** (`docs/handoff/<branch>.md`).
 
 <!-- variant: SOLO (git, no remote/gh) — use instead of TEAM -->
-- Don't work on or commit to the default branch. **Create a branch/worktree per task BEFORE editing — not at commit time** (`git switch -c <task>`, or `git worktree add ../<task> -b <task>`; **Claude Code provides native worktrees** for isolation).
+- **Don't edit, commit, or merge on the default branch without explicit user approval** — isolate every task, even solo. **Create the branch/worktree BEFORE editing — not at commit time** (`git worktree add ../<task> -b <task>`, or `git switch -c <task>`; **Claude Code provides native worktrees**). Don't touch worktrees you didn't create.
+- **After the work merges back, clean up in the same flow: `git worktree remove <path>` + `git branch -d <branch>`** — no stale worktrees/branches.
 - Commit in small, focused steps with the *why* in the body. (No PR ceremony needed for a solo repo.)
 
 <!-- variant: NONE (not a git repo) — replace section body with this single line -->
