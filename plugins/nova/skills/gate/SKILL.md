@@ -4,7 +4,7 @@ description: Adversarial completion-honesty audit of the current session. Spawns
 when_to_use: When the user runs /gate, before a commit/PR on a meaningful change, at the end of a work session, or whenever a completion claim needs independent verification.
 argument-hint: "[--strict]"
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Bash(git*), Bash(mkdir -p*), Task, Write
+allowed-tools: Read, Glob, Grep, Bash(git*), Bash(mkdir -p*), Bash(node*), Task, Write
 ---
 
 # /gate — adversarial completion-honesty audit
@@ -30,6 +30,19 @@ The audit MUST run as an **independent subagent in a separate context** (Generat
 
 4. **Verdict.** The verifier returns, per claim: `confirmed` / `unverified` / `false`, each with the concrete evidence (or its absence) and a severity (Critical / High / Medium). Overall **PASS** (no Critical) or **ISSUES**.
 
+   For every `unverified` or `false` claim, also assign exactly one `failure_mode` from the fixed cause→prevention taxonomy below. Classify by the underlying cause and the preventive action, not by matching words in the claim. Use the first specific root cause that applies; `completion-overstated` is only the fallback when no more specific mode explains the finding. If the evidence is insufficient to classify safely, use `unclassified` — never force unlike failures into one bucket.
+
+   | `failure_mode` | Cause | Preventive action |
+   |---|---|---|
+   | `verification-evidence-missing` | Required verification was not run, or no execution evidence exists | Run the exact required check and retain its passing output before claiming completion |
+   | `verification-failure-unresolved` | A check failed and completion was claimed without a passing rerun | Fix the failure and rerun the same check to a passing result |
+   | `requested-scope-omitted` | A requested requirement or acceptance criterion was left incomplete | Map every requested item to an implementation and evidence before completion |
+   | `unrequested-scope-added` | The diff includes work outside the requested scope | Keep changes within the request and obtain approval before expanding scope |
+   | `reference-not-found` | A referenced file, symbol, command, flag, or path does not exist | Resolve and inspect the real reference before using or reporting it |
+   | `ambiguity-not-raised` | A material ambiguity was silently assumed away | Surface the ambiguity and get direction before taking the divergent path |
+   | `completion-overstated` | Partial, skipped, or blocked work was reported as complete without a more specific cause above | Report the exact incomplete or blocked state and do not claim completion |
+   | `unclassified` | The record does not establish one fixed cause→prevention pair | Keep it observable, but do not promote it as a recurring-rule candidate |
+
 5. **Critical ⇒ second round.** If any Critical (false completion, or a dangerous unverified claim), after the main agent addresses it, **re-run the verifier** — don't accept the fix on faith — before declaring PASS.
 
 6. **Route the findings:**
@@ -37,7 +50,11 @@ The audit MUST run as an **independent subagent in a separate context** (Generat
    - A recurring mistake worth a durable rule → suggest **`/learn`**.
    - Real but unfinished / blocked work → suggest **`/handoff blocked`**.
 
-7. **Write the verdict ledger** to `.nova/gate-verdict.json`: `{ intent, head, timestamp, verdict, claims: [{ claim, status, evidence, severity }] }`. This is the **only** source `worklog --visual` may use for verdict badges — so a report can never fabricate "critical 0". Also **append the same object as one line to `.nova/gate-history.jsonl`** — the compounding record `/learn review` mines for recurring failure modes ("3 of the last 5 gates flagged unrun tests" → a durable rule).
+7. **Ensure the ledger stays machine-local, then write it.** Run once, before writing either ledger file:
+   ```sh
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/ensure-nova-gitignore.mjs" .nova
+   ```
+   This creates or augments `.nova/.gitignore` (ignore everything except `.gitignore` and `gate.on`) without touching any content already there — so `gate-verdict.json`, `gate-history.jsonl`, and (if present) `evidence.jsonl` never reach a team commit, even in a consumer repo that never opted into the evidence hook. Then write the verdict ledger to `.nova/gate-verdict.json`: `{ intent, head, timestamp, verdict, claims: [{ claim, status, evidence, severity, failure_mode? }] }`. `failure_mode` is required for `unverified` / `false` claims and omitted for `confirmed` claims. This additive field does not change the meaning of existing fields; older ledger lines remain valid. This is the **only** source `worklog --visual` may use for verdict badges — so a report can never fabricate "critical 0". Also **append the same object as one line to `.nova/gate-history.jsonl`** — the compounding record `/learn review` mines for recurring failure modes. The claim's evidence identifier is its 1-based position in `claims` (`claim index`); do not renumber claims while writing the two ledger forms.
 
 ## Output
 

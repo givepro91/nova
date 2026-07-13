@@ -1,0 +1,2 @@
+{"intent":"legacy pass remains valid","head":"legacy-pass","timestamp":"2026-07-13T00:05:01Z","verdict":"PASS","claims":[{"claim":"Existing behavior is verified.","status":"confirmed","evidence":"passing output","severity":"High"}]}
+{"intent":"legacy issue remains valid","head":"legacy-issue","timestamp":"2026-07-13T00:05:02Z","verdict":"ISSUES","claims":[{"claim":"A finding predating failure mode classification.","status":"unverified","evidence":"insufficient classification evidence","severity":"High"}]}

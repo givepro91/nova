@@ -6,6 +6,7 @@ NOVA="$(cd "$(dirname "$0")/.." && pwd)"
 LIB="$NOVA/plugins/nova/hooks/_lib.mjs"
 APPEND="$NOVA/plugins/nova/scripts/append-rule.mjs"
 APPLY="$NOVA/plugins/nova/scripts/apply-block.mjs"
+STOP="$NOVA/plugins/nova/hooks/stop.mjs"
 T=$(mktemp -d)
 fail() { echo "FAIL: $1"; exit 1; }
 
@@ -35,6 +36,12 @@ import('file://$LIB').then(m => {
   console.log('  ',JSON.stringify(f));
 });" || { rm -rf "$G"; fail "Korean path"; }
 rm -rf "$G"
+
+echo "== Fix: malformed handoff threshold env falls back to 3 =="
+G=$(mktemp -d); git -C "$G" init -q; mkdir -p "$G/docs/handoff"; touch "$G/a" "$G/b" "$G/c"
+printf '{"cwd":"%s"}\n' "$G" | HANDOFF_MIN_CHANGED_FILES=not-a-number node "$STOP" | python3 -c "import sys,json; d=json.load(sys.stdin); sys.exit(0 if d.get('decision')=='block' and '3 file' in d['reason'] else 1)" || { rm -rf "$G"; fail "malformed handoff threshold"; }
+rm -rf "$G"
+echo "  ok"
 
 echo "== Fix: append-rule inserts within block, whole-line END =="
 F="$T/ok.md"

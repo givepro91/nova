@@ -1,0 +1,6 @@
+{"intent":"continue after bad lines","head":"mixed-a","timestamp":"2026-07-13T00:03:01Z","verdict":"ISSUES","claims":[{"claim":"Missing verification evidence.","status":"unverified","evidence":"none","severity":"High","failure_mode":"verification-evidence-missing"}]}
+
+{not json
+{"intent":"","verdict":"ISSUES","claims":[]}
+{"intent":"continue after bad lines","head":"mixed-b","timestamp":"2026-07-13T00:03:02Z","verdict":"ISSUES","claims":[{"claim":"Missing verification evidence again.","status":"false","evidence":"none","severity":"High","failure_mode":"verification-evidence-missing"}]}
+{"intent":"continue after bad lines","head":"mixed-c","timestamp":"2026-07-13T00:03:03Z","verdict":"ISSUES","claims":[{"claim":"Verification evidence remains absent.","status":"unverified","evidence":"none","severity":"High","failure_mode":"verification-evidence-missing"}]}

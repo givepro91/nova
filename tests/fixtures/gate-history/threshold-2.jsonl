@@ -1,0 +1,2 @@
+{"intent":"verify threshold boundary","head":"gate-two-a","timestamp":"2026-07-13T00:00:01Z","verdict":"ISSUES","claims":[{"claim":"Verification output is missing.","status":"unverified","evidence":"command was not run","severity":"High","failure_mode":"verification-evidence-missing"}]}
+{"intent":"verify threshold boundary","head":"gate-two-b","timestamp":"2026-07-13T00:00:02Z","verdict":"ISSUES","claims":[{"claim":"Verification output is still missing.","status":"false","evidence":"no passing output","severity":"High","failure_mode":"verification-evidence-missing"}]}

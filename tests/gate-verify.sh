@@ -28,6 +28,11 @@ echo "  ok"
 run "$G" | python3 -c "import sys,json; d=json.load(sys.stdin); sys.exit(0 if '3 file' in d['reason'] else 1)" || fail "state files counted as work"
 echo "  state files excluded from count"; rm -rf "$G"
 
+echo "== malformed threshold env → default 3, not NaN/silent =="
+G=$(mkrepo); mkdir -p "$G/.nova"; touch "$G/.nova/gate.on" "$G/a" "$G/b" "$G/c"
+NOVA_GATE_MIN_CHANGED_FILES=not-a-number run "$G" | python3 -c "import sys,json; d=json.load(sys.stdin); sys.exit(0 if d.get('decision')=='block' and '3 file' in d['reason'] else 1)" || fail "malformed threshold did not fall back to 3"
+rm -rf "$G"; echo "  ok"
+
 echo "== opt-in ON + only .nova state changed → no block =="
 G=$(mkrepo); mkdir -p "$G/.nova"; touch "$G/.nova/gate.on"
 [ -z "$(run "$G")" ] || fail "blocked on state-only change"; rm -rf "$G"; echo "  ok"

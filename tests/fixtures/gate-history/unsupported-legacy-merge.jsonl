@@ -1,0 +1,3 @@
+{"intent":"do not merge cause-only wording","head":"cause-only-a","timestamp":"2026-07-13T00:04:01Z","verdict":"ISSUES","claims":[{"claim":"The required verification was not run.","status":"unverified","evidence":"no execution evidence","severity":"High"}]}
+{"intent":"do not merge cause-only wording","head":"cause-only-b","timestamp":"2026-07-13T00:04:02Z","verdict":"ISSUES","claims":[{"claim":"No execution evidence exists.","status":"false","evidence":"missing command output","severity":"High"}]}
+{"intent":"do not merge cause-only wording","head":"cause-only-c","timestamp":"2026-07-13T00:04:03Z","verdict":"ISSUES","claims":[{"claim":"검증 명령의 통과 출력이 누락됐다.","status":"unverified","evidence":"통과 출력 없음","severity":"High"}]}
