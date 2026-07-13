@@ -7,3 +7,7 @@ node_modules/
 
 # Nova machine-state artifacts (ledgers/verdicts) — opt-in markers (.nova/*.on) stay committable
 .nova/*.json
+
+# Crewdeck — agent worktrees (do not commit)
+.crewdeck-worktrees/
+.claude/worktrees/
