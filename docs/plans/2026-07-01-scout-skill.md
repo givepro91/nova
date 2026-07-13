@@ -18,7 +18,7 @@
 - ledger 경로 = **`.nova/scout-candidates.json`** · slug = canonical(대상 시스템 + 동작 동사).
 - `SKILL.md`만 (결정적 grep 스크립트 **없음**). 특정 스택/프레임워크 스캐폴드 **금지**.
 - eval/observability는 후보 위험도·규모에 **티어링** (전부 필수 아님, 상한 체크리스트).
-- **커밋은 사용자 승인 시에만** — 아래 commit step은 스테이징·메시지 준비까지; 실제 `git commit`은 사용자 요청 시 실행 (Jay CLAUDE.md).
+- **커밋은 사용자 승인 시에만** — 아래 commit step은 스테이징·메시지 준비까지; 실제 `git commit`은 사용자 요청 시 실행 (사용자/프로젝트 commit 정책).
 
 ---
 

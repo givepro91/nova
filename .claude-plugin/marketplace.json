@@ -5,7 +5,7 @@
     {
       "name": "nova",
       "source": "./plugins/nova",
-      "description": "A compounding-agent nervous system — five loops in one install: rules + learning (/claude-md, /learn), continuity (/handoff), completion-honesty gate (/gate), and session worklog (/document, optional Nova-branded HTML). Honest, git-native, low context-tax; all hooks opt-in per project."
+      "description": "A compounding-agent nervous system for both you and your coding agent — five loops in one install: rules + learning (/claude-md, /learn), continuity (/handoff), completion-honesty gate (/gate), and session worklog (/document, optional Nova-branded HTML). Honest, git-native, low context-tax; all hooks opt-in per project."
     }
   ]
 }

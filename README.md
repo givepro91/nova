@@ -1,8 +1,8 @@
 # Nova
 
-> A compounding-agent nervous system for [Claude Code](https://docs.claude.com/en/docs/claude-code).
+> A compounding-agent nervous system for [Claude Code](https://docs.claude.com/en/docs/claude-code) — for both you and your coding agent.
 
-Nova is a single Claude Code **plugin** — five **loops** that turn each coding session into raw material the agent learns from, so it doesn't reset every session, it **compounds**. Honest, git-native, low context-tax. One install; every hook is opt-in per project.
+Nova is a single Claude Code **plugin** — five **loops** that turn each coding session into raw material both sides compound on: the agent stops resetting session to session (rules · learning · continuity), and you get honesty and a record you can actually judge (gate · document). Honest, git-native, low context-tax. One install; every hook is opt-in per project.
 
 ## The loops
 

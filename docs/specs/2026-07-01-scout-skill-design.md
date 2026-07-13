@@ -132,7 +132,7 @@ Top-1(또는 사용자가 고른 후보)을 §6 설계 스펙 문서로 출력.
   = **Read, Glob, Grep, Bash(git*), Bash(mkdir -p*), Task, Write**. (`mkdir -p` = `docs/specs/`·`.nova/` 생성용.)
 - 호출: `/scout` · 사용자 응답 **한국어** · 브랜드 violet.
 - **산출물 정책:** 설계 스펙 = `docs/specs/<slug>-agent-design.md`(경로 고정) · **파일 생성만, commit은 사용자에게**
-  (Jay CLAUDE.md의 자동 commit 금지 준수). ledger = `.nova/scout-candidates.json`.
+  (사용자/프로젝트 commit 정책 준수 — 자동 commit 금지). ledger = `.nova/scout-candidates.json`.
 - **문서 갱신(m2):** README/CLAUDE에서 **loops(5)와 capabilities를 분리**하는 섹션 신설 —
   `scout` + 기존 `design-direction`을 capability로 등재, "5 loops" 표현 정정. (scout 구현에 딸린 최소 정정.)
 - **`.gitignore`:** `.nova/`의 **머신 상태 산출물만** 무시(`.nova/*.json` — `scout-candidates.json`·`gate-verdict.json` 등).

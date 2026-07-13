@@ -171,7 +171,7 @@ Top-1(또는 사용자가 고른 후보)을 §출력 (b) 설계 스펙 문서로
 ## 산출물 규칙
 
 - **설계 스펙 경로는 고정** — `docs/specs/<slug>-agent-design.md`. 다른 경로로 흩뿌리지 않는다.
-- **파일 생성만 · commit은 사용자에게** — Jay CLAUDE.md의 자동 commit 금지를 준수한다. `/scout`는 절대 스스로 `git add`/`git commit` 하지 않는다.
+- **파일 생성만 · commit은 사용자에게** — 사용자/프로젝트의 commit 정책을 존중한다(자동 commit 금지). `/scout`는 절대 스스로 `git add`/`git commit` 하지 않는다.
 - 디렉토리 확보는 `mkdir -p`로 — `docs/specs/`, `.nova/` 를 쓰기 전에 보장한다.
 - **ledger = `.nova/scout-candidates.json`** (머신 상태). `.nova/*.json`은 gitignore되어 커밋되지 않으며, `.nova/gate.on` 같은 opt-in 마커는 팀 공유를 위해 커밋 가능하게 남는다.
 - 위치 = **`SKILL.md`만** (결정적 grep 스크립트 없음). 스캔/이해는 내장 검색도구 + Explore 서브에이전트로.
