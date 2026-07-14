@@ -1,0 +1,118 @@
+/*
+ * Design tokens — the single canonical source for this repo's UI values.
+ * Every value in docs/STYLEGUIDE.md maps to a token here; reference tokens by role,
+ * never hardcode a new value when one of these covers it.
+ *
+ * Framework-neutral (plain CSS custom properties). If the stack uses Tailwind / a token
+ * pipeline, emit the same roles in that format instead — the ROLES are the contract, not the syntax.
+ *
+ * Placeholder values are neutral greys marked `replace via /design-direction`. Lock the
+ * subjective look (hues, type personality) with /design-direction or frontend-design, then
+ * fill these in. No webfont CDN — system-font fallback is required.
+ */
+
+:root {
+  /* Color — light (replace via /design-direction) */
+  --color-bg:          #ffffff;
+  --color-surface:     #f6f6f7;
+  --color-border:      #e2e2e5;
+  --color-text:        #1a1a1e;
+  --color-text-muted:  #56565e; /* AA on --color-bg: verify ≥ 4.5:1 after recolor */
+  --color-primary:     #4b4bf5; /* placeholder brand — replace */
+  --color-accent:      #7c5cff; /* placeholder accent — replace */
+  --color-success:     #1f8a52;
+  --color-warn:        #a8690a;
+  --color-danger:      #c0362c;
+
+  /* Typography — system stack, no CDN */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo",
+               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.375rem;
+  --text-2xl:  1.75rem;
+  --text-3xl:  2.25rem;
+  --leading-tight: 1.25;
+  --leading-body:  1.6;
+
+  --weight-body:    400;
+  --weight-medium:  500;
+  --weight-emph:    600;
+  --weight-display: 700;
+
+  /* Spacing scale — use steps, not arbitrary px */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Radius */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   14px;
+  --radius-full: 999px;
+
+  /* Elevation — a fixed, small set of tiers; pick one, don't invent */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-decel:    cubic-bezier(0, 0, 0, 1);
+}
+
+/* Dark set — cared for, not a naive invert. `prefers-color-scheme` is the default signal; */
+/* a manual [data-theme] toggle wins in both directions. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg:          #131316;
+    --color-surface:     #1c1c21;
+    --color-border:      #2c2c33;
+    --color-text:        #ececf0;
+    --color-text-muted:  #a1a1ac; /* verify AA on dark --color-bg */
+    --color-primary:     #8a8aff;
+    --color-accent:      #a690ff;
+    --color-success:     #46c08a;
+    --color-warn:        #e0a94a;
+    --color-danger:      #ef6a5f;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.55);
+    --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.6);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg:          #131316;
+  --color-surface:     #1c1c21;
+  --color-border:      #2c2c33;
+  --color-text:        #ececf0;
+  --color-text-muted:  #a1a1ac;
+  --color-primary:     #8a8aff;
+  --color-accent:      #a690ff;
+  --color-success:     #46c08a;
+  --color-warn:        #e0a94a;
+  --color-danger:      #ef6a5f;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.55);
+  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

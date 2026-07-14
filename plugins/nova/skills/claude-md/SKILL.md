@@ -83,6 +83,8 @@ For the plain CLAUDE.md-only case, no confirmation is needed.
 - **Think before coding.** State assumptions; if uncertain, ask. Surface tradeoffs and competing interpretations instead of silently picking one.
 - **Simplicity first.** Write the minimum code that solves the stated problem. No speculative features, abstractions, or configuration for single-use code.
 - **Surgical changes.** Touch only what the task requires. Don't refactor or reformat adjacent code; match the existing style. Remove only what your change made unused.
+- **Comment the why, not the what.** When a design doc or a non-obvious constraint drives the code, add a one- or two-line comment for the *reason* (safety constraint, compat shim, design-doc rule). Don't restate what the code does or narrate the mechanism.
+- **Name for content, not role.** Name a file/module after the concrete thing it holds. Avoid catch-all names (`utils`, `helpers`, `common`, `misc`, `shared`) — they become dumping grounds; reaching for `helpers` usually means the file has more than one responsibility and should be split.
 - **Goal-driven.** Define a concrete success check (test / build / command / screenshot) before coding, then loop until it passes.
 
 ## Verification
@@ -93,12 +95,13 @@ For the plain CLAUDE.md-only case, no confirmation is needed.
 <!-- variant: TEAM (git + remote + gh) -->
 - **Never edit, commit, or merge on the default branch (`main`/`master`) without explicit user approval.** Isolation is the default even for a single session. **One task = one ISSUE = one branch.**
 - **Create the branch/worktree BEFORE you start editing — not at commit time.** Isolate each task in its own **git worktree** (`git worktree add ../<task> -b <branch>`), or use your agent's native worktree support — **Claude Code provides worktrees** — so parallel sessions never share a checkout and never collide on `main`. Don't touch worktrees you didn't create (another session's, or tool-managed ones).
+- **Stay in the worktree you were given.** Read and edit only inside your task's working directory. A subagent's result may report absolute paths into the main checkout — never follow them back to `main`; re-resolve the path inside your own worktree. Following them silently breaks the isolation above.
 - **Clean up when the work lands: once the branch is merged, remove its worktree and delete the branch in the same flow** (`git worktree remove <path>` + `git branch -d <branch>`) — never leave stale worktrees/branches behind.
 - Open small, surgical PRs that reference the issue (e.g. "Fixes #42"); keep one concern per PR.
 - If cc-handoff is installed: **one branch = one handoff** (`docs/handoff/<branch>.md`).
 
 <!-- variant: SOLO (git, no remote/gh) — use instead of TEAM -->
-- **Don't edit, commit, or merge on the default branch without explicit user approval** — isolate every task, even solo. **Create the branch/worktree BEFORE editing — not at commit time** (`git worktree add ../<task> -b <task>`, or `git switch -c <task>`; **Claude Code provides native worktrees**). Don't touch worktrees you didn't create.
+- **Don't edit, commit, or merge on the default branch without explicit user approval** — isolate every task, even solo. **Create the branch/worktree BEFORE editing — not at commit time** (`git worktree add ../<task> -b <task>`, or `git switch -c <task>`; **Claude Code provides native worktrees**). Don't touch worktrees you didn't create, and never follow a subagent's absolute path back into the main checkout — re-resolve it inside your own worktree.
 - **After the work merges back, clean up in the same flow: `git worktree remove <path>` + `git branch -d <branch>`** — no stale worktrees/branches.
 - Commit in small, focused steps with the *why* in the body. (No PR ceremony needed for a solo repo.)
 
@@ -113,5 +116,5 @@ For the plain CLAUDE.md-only case, no confirmation is needed.
 ## Notes
 
 - The block uses distinct markers (`CC-RULES`), so it never collides with an OMC (`OMC:START`) block in the same file.
-- Keep the block lean — it's guidance, not documentation. Project-specific detail belongs in the preamble or the user's free area.
+- Keep the block lean — it's guidance, not documentation. Project-specific conventions (a design-system / STYLEGUIDE contract, a lint-config policy, a stack-specific rule) do NOT go in the block — they belong in the preamble, the user's free area, or the Self-Learning Rules that `/learn` accumulates per project.
 - `/learn` is the companion that grows the Self-Learning Rules; it writes to the same canonical file this skill chose.

@@ -20,6 +20,7 @@ Nova is a single Claude Code **plugin** — five **loops** that turn each coding
 |------------|---------|---------------|
 | **Discovery & Design** | `/scout` | 아무 프로젝트에서 "AI가 안전하게 *행동*할 자리"를 발굴·적합도 랭킹하고, 선택 후보를 safe-action-agent 설계 스펙으로 출력. 랭킹은 `.nova/` ledger로 compounding |
 | **Design Direction** | `/design-direction` | Settle vague aesthetic asks ("modern", "sleek") by rendering 2–4 real mockups and narrowing from the user's reactions, instead of guessing from adjectives |
+| **Design System** | `/design-system` | Set up a portable design-system *contract* agents obey — `docs/STYLEGUIDE.md` (roles + a resolution order) + one canonical token source + a binding rule wired in via `/claude-md` — so UI work uses documented tokens, not invented values. Stack-adaptive, installs nothing; routes the subjective look to `/design-direction` |
 | **Web Doc** | `/web-doc` | Turn content into ONE self-contained HTML document (inline CSS, system fonts, no CDN, light+dark, a11y) in a style that fits its character — notion (reading), report (analysis/RCA), editorial (showcase); routes to `/design-direction` when the look is subjective |
 | **Change Explainer** | `/explain-diff` | Turn a diff / commit / branch / PR into ONE self-contained HTML explainer — background → intuition (toy data + HTML diagrams) → literate code walkthrough → a comprehension quiz. The human-understanding counterpart to `/gate`: *understand to participate, not just approve* |
 
