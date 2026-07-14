@@ -72,7 +72,14 @@ For the plain CLAUDE.md-only case, no confirmation is needed.
    …composed block body…
    BLOCK
    ```
-7. **Verify & report:** show the resulting block, confirm pre-existing content is intact, and note that re-running is safe. Offer to commit (don't commit without approval).
+7. **Sync approved team rules if the canonical store exists.** This validates the complete store first, projects only `active` records in stable ID order, and fails without touching the target on malformed schema, conflict markers, or broken provenance:
+   ```sh
+   if [ -f <root>/.nova/rules.md ]; then
+     node "${CLAUDE_PLUGIN_ROOT}/scripts/apply-block.mjs" --sync-team-rules <root>/.nova/rules.md <target file>
+     node "${CLAUDE_PLUGIN_ROOT}/scripts/apply-block.mjs" --check-team-rules <root>/.nova/rules.md <target file>
+   fi
+   ```
+8. **Verify & report:** show the resulting block, confirm pre-existing content is intact, and note that re-running is safe. Offer to commit (don't commit without approval).
 
 ## Managed block body — template
 
@@ -107,6 +114,9 @@ For the plain CLAUDE.md-only case, no confirmation is needed.
 
 <!-- variant: NONE (not a git repo) — replace section body with this single line -->
 - Not a git repo yet — run `git init` to enable branch/worktree isolation for parallel sessions.
+
+<!-- NOVA:TEAM-RULES:START -->
+<!-- NOVA:TEAM-RULES:END -->
 
 ## Self-Learning Rules
 <!-- Append one concise rule per correction. `/learn` writes here automatically; newest first. -->

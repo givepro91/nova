@@ -83,4 +83,21 @@ L=$(wc -l < "$G/.nova/evidence.jsonl")
 tail -1 "$G/.nova/evidence.jsonl" | grep -q 'echo rotate' || fail "newest entry lost in rotation"
 rm -rf "$G"; echo "  ok"
 
+echo "== evidence: symlinked .gitignore is left untouched (fail-open, no follow) =="
+S=$(mkrepo); mkdir -p "$S/.nova"; touch "$S/.nova/gate.on"
+printf 'DO NOT OVERWRITE\n' > "$S/victim.txt"
+ln -s ../victim.txt "$S/.nova/.gitignore"
+rec "$S" "echo ok" "ok"
+[ "$(cat "$S/victim.txt")" = "DO NOT OVERWRITE" ] || fail "symlinked .gitignore target was overwritten"
+[ -L "$S/.nova/.gitignore" ] || fail "symlink was replaced instead of skipped"
+rm -rf "$S"; echo "  ok"
+
+echo "== evidence: symlinked ledger is not appended/followed =="
+S=$(mkrepo); mkdir -p "$S/.nova"; touch "$S/.nova/gate.on"
+printf 'DO NOT OVERWRITE\n' > "$S/victim.jsonl"
+ln -s ../victim.jsonl "$S/.nova/evidence.jsonl"
+rec "$S" "echo ok" "ok"
+[ "$(cat "$S/victim.jsonl")" = "DO NOT OVERWRITE" ] || fail "symlinked ledger target was appended to"
+rm -rf "$S"; echo "  ok"
+
 echo ""; echo "ALL PASS"

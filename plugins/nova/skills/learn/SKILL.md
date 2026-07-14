@@ -1,13 +1,13 @@
 ---
 name: learn
-description: Capture a lesson from a mistake into CLAUDE.md's Self-Learning Rules so the same mistake isn't repeated. Distills the most recent correction into ONE concise, reusable rule and appends it (deduped). `/learn review` is the gardener — consolidates, generalizes, retires, and promotes accumulated rules so the list stays sharp instead of becoming noise. Use right after Claude does something wrong and the user corrects it, or when the user runs /learn.
-when_to_use: When the user runs /learn, or right after a correction ("no, don't…", "again", "that's wrong", "always/never do X") that should become a durable rule. /learn review when the rule list has grown stale or long.
-argument-hint: "[rule text | review]"
+description: Capture a lesson from a mistake into personal Self-Learning Rules, or explicitly propose and human-review sanitized team rules in `.nova/rules.md`. Distills the most recent correction into ONE concise, reusable rule. `/learn review` gardens personal rules; `/learn team` creates proposed-only records; `/learn team <promote|merge|generalize|retire>` applies an explicitly approved team operation.
+when_to_use: When the user runs /learn, or right after a correction ("no, don't…", "again", "that's wrong", "always/never do X") that should become a durable rule. Use /learn team only when the user explicitly chooses to share or review a lesson with the team. /learn review when the personal rule list has grown stale or long.
+argument-hint: "[rule text | team [rule text | promote|merge|generalize|retire] | review]"
 disable-model-invocation: true
-allowed-tools: Read, Edit, Bash(git rev-parse*), Bash(node*), Bash(readlink*), Bash(grep*)
+allowed-tools: Read, Edit, Bash(git rev-parse*), Bash(git diff*), Bash(node*), Bash(readlink*), Bash(grep*)
 ---
 
-# /learn — append a rule from a mistake
+# /learn — keep a rule from a mistake
 
 Turn a correction into a durable rule in the canonical agent file's **Self-Learning Rules**, so the next session doesn't repeat it. This is the "compounding engineering" loop: every mistake makes the rules sharper.
 
@@ -33,6 +33,63 @@ Turn a correction into a durable rule in the canonical agent file's **Self-Learn
    ```
    (`<target file>` = the canonical file resolved in step 1.) It inserts `- (YYYY-MM-DD) <rule>` after the anchor (newest first) and skips normalized exact duplicates.
 5. **Confirm** the added line (or report it was a duplicate). Offer to commit (don't commit without approval).
+6. **Offer team sharing as a separate choice.** Do not create a team proposal unless the user explicitly accepts or invoked `/learn team`.
+
+## Procedure — `team` (explicit team proposal)
+
+`/learn team [rule text]` is a proposal-only path. It writes `.nova/rules.md`; it does not append to the personal Self-Learning Rules, project `CLAUDE.md`, or `AGENTS.md`. If the user chooses team sharing after a normal `/learn`, the personal write has already happened, but this team step must not modify those files further.
+
+1. **Require an explicit choice.** Enter this path only for `/learn team` or a clear yes to the separate team-sharing offer. A correction by itself is not consent to share it.
+2. **Distill one rule** using the same imperative, one-line, language-preserving rules above.
+3. **Prepare only reviewed metadata:**
+   - `scope`: a non-empty JSON array of repo-relative globs. Use `["**"]` only when the rule truly applies to the whole repository; ask when the intended scope is ambiguous.
+   - `source-summary`: one newly written line describing the kind of reviewed source, without quoting the correction or transcript.
+   - `evidence-summary`: one newly written line explaining why the rule prevents recurrence, without command text or output.
+   - `rule`: the one-line executable rule.
+   Never copy raw transcript, `.nova/evidence.jsonl`, command output, stack traces, credentials, or secret-looking strings into any field. Do not read machine-local evidence merely to populate this proposal.
+4. **Append the proposal through the validator** (replace the example values with the reviewed metadata):
+   ```sh
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/team-rules.mjs" propose "<project root>/.nova/rules.md" <<'JSON'
+   {
+     "scope": ["**"],
+     "source-summary": "사용자 교정에서 반복 가능한 작업 원칙을 확인했다.",
+     "evidence-summary": "같은 누락의 재발을 막기 위해 팀 검토가 필요하다.",
+     "rule": "변경을 완료했다고 말하기 전에 관련 검증 명령의 성공을 확인한다."
+   }
+   JSON
+   ```
+   The helper assigns the stable ID and fixes `status: proposed`, `origin: propose`, and `derived-from: []`; never hand-author or override those fields. If validation rejects a field, rewrite the summary safely or ask the user—never weaken or bypass the validator.
+5. **Report the proposal ID and review boundary.** State that the rule is not active and `CLAUDE.md` was not changed by this step. Show the user the `.nova/rules.md` diff for review, but do not approve, commit, or push it.
+
+## Procedure — `team promote|merge|generalize|retire` (human-approved gardener)
+
+Run a team gardener operation only after the user explicitly approves the exact IDs and result. Read and validate the current `.nova/rules.md`, show the planned status/provenance change, and do not infer approval from an earlier correction or proposal.
+
+- **Promote** changes one existing `proposed` record to `active` without changing its ID or content:
+  ```sh
+  printf '%s\n' '{"id":"rule-20260713-a1b2c3d4"}' |
+    node "${CLAUDE_PLUGIN_ROOT}/scripts/team-rules.mjs" promote "<project root>/.nova/rules.md"
+  ```
+- **Retire** changes one non-retired record to `retired` and requires a newly written one-line reason:
+  ```sh
+  printf '%s\n' '{"id":"rule-20260713-a1b2c3d4","retired-reason":"The guarded workflow no longer exists."}' |
+    node "${CLAUDE_PLUGIN_ROOT}/scripts/team-rules.mjs" retire "<project root>/.nova/rules.md"
+  ```
+- **Merge/generalize** require every reviewed source ID plus the explicit result scope, sanitized summaries, and final one-line rule. They create one new `active` record, preserve the source IDs in `derived-from`, and retire each source with the replacement ID:
+  ```sh
+  node "${CLAUDE_PLUGIN_ROOT}/scripts/team-rules.mjs" merge "<project root>/.nova/rules.md" <<'JSON'
+  {
+    "derived-from": ["rule-20260713-a1b2c3d4", "rule-20260713-b2c3d4e5"],
+    "scope": ["src/**", "tests/**"],
+    "source-summary": "Two reviewed proposals describe the same change boundary.",
+    "evidence-summary": "One shared rule prevents both recurring omissions.",
+    "rule": "Before changing shared behavior, inspect its callers and related tests."
+  }
+  JSON
+  ```
+  Use `generalize` instead of `merge` only when the approved result is a broader but still actionable principle. Never choose one source's scope or body automatically when sources differ; the user must approve the explicit result fields.
+
+If the file changed since review, a source is missing/already retired, IDs are duplicated, or any field fails sanitization/schema validation, stop on the non-zero result and show the fresh diff. Never bypass the validator, edit statuses by hand, activate another proposal, commit, or push. On success, the command itself resolves the repo's canonical agent file (CLAUDE.md, or AGENTS.md when canonical — same rules as `/claude-md`) and projects the now-`active` rules into its `CC-RULES` managed block, removing any rule that just became `retired`; a repo with no canonical file yet is not an error (`.nova/rules.md` stays the source of truth and can be synced later). This operation changes only `.nova/rules.md`, the approved `.nova/.gitignore` allowlist, and that projected region of the canonical file — never commit or push it.
 
 ## Examples
 

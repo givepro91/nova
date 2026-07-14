@@ -30,6 +30,88 @@ handoff + gate **share one `hooks/_lib.mjs`** (the monolith removed the cross-pl
 8. **Single plugin, not 4 (B over A) — v0.2.0.** Started modular (4 plugins) for context-tax avoidance, then verified (official docs) that a monolith has **LESS** always-on cost (1 plugin metadata vs 4) and that all nova hooks are opt-in markers anyway — so the split's justification didn't hold. Nova's loops are also one *designed system* (gate routes to learn/handoff/worklog; worklog reads gate's ledger). So: one `nova` plugin, five skills; `/plugin install nova@nova` = everything (no meta-plugin band-aid). Trade-off: no per-loop uninstall — acceptable (loops are a system; unused ones stay silent via opt-in hooks). Officially-backed alternative considered: `plugin.json` `dependencies` (a meta-plugin auto-installing the 4) — rejected as a band-aid that keeps the unjustified split + adds a 5th metadata entry.
 
 9. **Evidence ledger (v0.2.5) — gate의 "정직"을 프롬프트 규율에서 기록 구조로.** A verifier that reads only the session's narration inherits its optimism, and compaction erases the raw output it needs. So `.nova/gate.on` also activates a PostToolUse:Bash hook (`evidence.mjs`) appending every command + output tail to `.nova/evidence.jsonl` (rotated at 512KB; kill switch `NOVA_GATE_EVIDENCE=0`). The hook drops `.nova/.gitignore` (`*` except `gate.on`) because output tails may contain anything → the ledger is machine-local by construction. Gate verdicts also append to `.nova/gate-history.jsonl`, which `/learn review` (rule gardener: merge/generalize/retire/promote) mines for recurring failure modes. Trade-off: ~40ms node spawn per Bash call in opted-in projects — accepted (opt-in only).
+10. **Canonical team memory = tracked `.nova/rules.md`.** 정제된 팀 규칙은 한 Markdown 파일을 원본으로 삼는다. git diff에서 제안과 상태 변경을 함께 검토할 수 있고, 특정 호스팅이나 회사 내부 서비스 없이 이력과 이식성을 얻기 때문이다.
+11. **`CLAUDE.md` = active-only projection.** 새 세션에 자동 적용할 내용은 `active` 규칙만 기존 managed block에 안정된 ID 순서로 투영한다. `proposed`와 `retired`를 컨텍스트에서 제외하면서, 같은 승인 커밋을 받은 팀원이 동일한 규칙 집합을 읽게 하기 때문이다.
+12. **Human approval is the only activation gate.** `/learn`의 팀 공유 결과는 항상 `proposed`로 시작하며 자동 승인, commit, push를 하지 않는다. 개인 교정이나 에이전트의 추론이 검토 없이 팀 전체의 행동을 바꾸지 못하게 하기 때문이다.
+13. **Rule conflicts fail closed.** malformed record, 중복 ID, 끊긴 provenance, 허용되지 않은 상태 전이, git conflict marker가 하나라도 있으면 projection 쓰기를 거부한다. 조용한 last-write-wins가 팀 기억을 덮어쓰거나 기존 `CLAUDE.md`를 손상시키지 않게 하기 때문이다.
+14. **Raw evidence stays machine-local.** `.nova/evidence.jsonl`, gate ledger, transcript, 명령 출력 원문은 팀 규칙의 입력 근거가 될 수 있지만 git 추적 아티팩트로 복사하지 않는다. 팀에는 사람이 검토할 수 있게 새로 쓴 출처 요약과 근거 요약만 남겨 비밀과 로컬 실행 정보의 유출 경로를 줄이기 때문이다.
+
+## Team rules storage contract — approval required
+
+### 판단층
+
+**TL;DR.** 위 다섯 결정은 잠겼지만, 아래 레코드 스키마와 `.nova/.gitignore` allowlist는 아직 구현 승인을 받지 않았다. 승인 전에는 `.nova/rules.md`를 만들거나 projection, `/learn`, gardener, hook, script를 변경하지 않는다.
+
+**한 일.** 팀 규칙의 원본과 새 세션용 projection을 분리하고, 사람 승인과 fail-closed 경계를 명시했다. 원본 evidence가 추적 파일로 흘러가지 않도록 저장 경계도 고정했다.
+
+**남은 결정.** 아래 v1 스키마와 allowlist를 그대로 승인할지 사용자가 결정해야 한다. 수정 승인이면 바뀐 항목을 다시 문서화한 뒤 구현하고, 보류면 이 단계에서 멈춘다.
+
+### 엔지니어링 기록층
+
+#### 제안: `.nova/rules.md` v1
+
+파일은 `schema: nova-team-rules/v1` frontmatter와 규칙 섹션으로 구성한다. 각 규칙은 아래 형식을 따르며 필드명과 순서를 고정한다.
+
+```md
+---
+schema: nova-team-rules/v1
+---
+
+# Nova team rules
+
+## `rule-20260713-a1b2c3d4`
+
+- status: `proposed`
+- scope: `["**"]`
+- source-summary: `사용자 교정에서 확인한 문제를 원문 없이 요약한다.`
+- evidence-summary: `반복을 막아야 하는 근거를 명령 출력 없이 요약한다.`
+- origin: `propose`
+- derived-from: `[]`
+
+### Rule
+
+변경을 완료했다고 말하기 전에 관련 검증 명령의 성공을 확인한다.
+```
+
+- ID는 생성 시 한 번만 부여하는 `rule-YYYYMMDD-<8 lowercase hex>` 형식이다. 본문을 고쳐도 ID는 바꾸지 않으며, 중복이면 쓰기를 거부한다.
+- `status`는 `proposed`, `active`, `retired`만 허용한다. `retired`에는 `retired-reason` 한 줄이 필수이고, 다른 상태에는 이 필드를 두지 않는다.
+- `scope`는 repo-relative glob의 JSON 배열이다. 저장소 전체는 `["**"]`로 표현하며 빈 배열, 절대 경로, 저장소 밖을 가리키는 경로는 거부한다.
+- `source-summary`와 `evidence-summary`는 각각 새로 작성한 한 줄 요약이다. evidence나 transcript 원문, 명령 출력, 코드 블록, 비밀 문자열을 넣지 않으며 정제 검사를 통과하지 못하면 쓰지 않는다.
+- `origin`은 `propose`, `merge`, `generalize`만 허용한다. `derived-from`은 원본 규칙 ID의 JSON 배열이며, `merge`와 `generalize`에서는 비어 있을 수 없다.
+- `Rule` 본문은 projection 가능한 한 줄의 실행 규칙이다. 빈 본문과 unresolved conflict marker가 있는 문서는 전체 쓰기를 거부한다.
+
+`promote`는 같은 ID의 상태만 `proposed`에서 `active`로 바꾼다. `merge`와 `generalize`는 사람 승인 뒤 새 ID의 active 규칙을 만들고 모든 원본 ID를 `derived-from`에 보존한다. 원본 레코드는 대체 규칙 ID를 폐기 사유에 남긴 채 retired로 전환한다. 참조된 원본 레코드가 없거나 provenance chain이 순환하면 아무 파일도 쓰지 않는다.
+
+`retire`는 상태를 retired로 바꾸고 사유를 보존한다. 레코드를 삭제하지 않으므로 출처 요약, 근거 요약, 변환 계보는 git history에만 의존하지 않고 현재 아티팩트에서도 검토할 수 있다.
+
+#### 제안: active-only projection
+
+기존 `CLAUDE.md` managed block 안에 아래 전용 구간을 정확히 한 번 유지한다. active 레코드를 ID의 bytewise 오름차순으로 정렬하고 각 scope와 본문을 한 줄로 렌더링한다.
+
+```md
+<!-- NOVA:TEAM-RULES:START -->
+- [scope: **] 변경을 완료했다고 말하기 전에 관련 검증 명령의 성공을 확인한다. <!-- nova-rule:rule-20260713-a1b2c3d4 -->
+<!-- NOVA:TEAM-RULES:END -->
+```
+
+proposed와 retired 레코드는 이 구간에 나타나지 않는다. 입력 문서 검사가 끝나기 전에는 `CLAUDE.md`를 열어 쓰지 않으며, 같은 입력으로 다시 실행했을 때 byte diff가 없어야 한다.
+
+#### 제안: `.nova/.gitignore` allowlist
+
+현재 machine-local 기본값을 유지하면서 팀 아티팩트 하나만 추가로 추적한다.
+
+```gitignore
+*
+!.gitignore
+!gate.on
+!rules.md
+```
+
+이 allowlist는 `.nova/rules.md`만 새로 공유한다. `evidence.jsonl`, `gate-history.jsonl`, `gate-verdict.json`과 그 밖의 로컬 산출물은 계속 무시한다. hook이 기존 `.gitignore`를 갱신해야 하는 경우에도 이 네 줄을 결정론적으로 보존해야 한다.
+
+#### 승인 게이트
+
+구현 시작 조건은 사용자의 명시적 승인이다. 승인 대상은 `.nova/rules.md` v1 필드와 전이 의미론, projection 형식, `.nova/.gitignore` 네 줄 allowlist다. 승인이 없으면 이 문서 변경만 남기고 구현 단계로 넘어가지 않는다.
 
 10. **`/web-doc` capability — its own skill, not folded into `/design-direction` or `/worklog` (v0.2.x).** A document deserves a style pitched at *what it is*; one look for every doc (or a claude.ai-style landing hero) is the tell that no choice was made. The two adjacent skills don't cover it: `/design-direction` *decides* a subjective look by showing mockups, `/worklog` renders a *session record* in one deterministic Nova-branded template. `/web-doc` is the missing **build** capability — character → style (notion/report/editorial), one self-contained file (inline CSS, system fonts, no CDN, light+dark, a11y — same self-contained rule as #6), routing to `/design-direction` when the look is genuinely subjective. **Model-invocable** (unlike `scout`/`design-direction`, which are explicit-only) so "make this a web page / 페이지로 만들어줘" triggers it — deliberate, because a well-triggered skill replaces an ad-hoc "always use tool X" global rule while keeping the design tool **pluggable** ("frontend-design or better", never hardcoded). Trade-off: one more capability surface on the public plugin — accepted (build sibling of `design-direction`; self-contained per #6, zero deps).
 
