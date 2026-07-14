@@ -1,13 +1,13 @@
 ---
-name: document
+name: worklog
 description: Synthesize the current session into a durable worklog — a cross-session narrative of what was accomplished, the decisions and WHY (over which alternatives), what was learned, and what's left open. NOT a git-log dump. Writes docs/worklog/<date>-<slug>.md. Optional --visual also renders a self-contained Nova-branded HTML.
-when_to_use: When the user runs /document, at the end of a meaningful session, or when a durable "what we did and why" record is worth keeping beyond commit messages.
+when_to_use: When the user runs /worklog, at the end of a meaningful session, or when a durable "what we did and why" record is worth keeping beyond commit messages.
 argument-hint: "[--visual]"
 disable-model-invocation: true
 allowed-tools: Read, Glob, Grep, Bash(git*), Bash(mkdir -p*), Bash(node*), Write
 ---
 
-# /document — synthesize a session worklog
+# /worklog — synthesize a session worklog
 
 Record what this session actually accomplished as a **durable narrative**, so the *why* survives where git log can't carry it.
 

@@ -329,7 +329,7 @@
     <span class="tok" style="left:30%; top:14%; animation-duration:16s; animation-delay:4s;">LEARN: rule added</span>
     <span class="tok" style="left:50%; top:80%; animation-duration:14s; animation-delay:1.5s;">tests: 12 passed</span>
     <span class="tok" style="left:86%; top:48%; animation-duration:18s; animation-delay:2.5s;">scope: clean</span>
-    <span class="tok" style="left:3%; top:78%; animation-duration:15s; animation-delay:5s;">/document --visual</span>
+    <span class="tok" style="left:3%; top:78%; animation-duration:15s; animation-delay:5s;">/worklog --visual</span>
     <span class="tok" style="left:60%; top:36%; animation-duration:20s; animation-delay:0.5s;">compounding++</span>
     <span class="tok" style="left:40%; top:50%; animation-duration:17s; animation-delay:3.5s;">opt-in</span>
   </div>
@@ -433,7 +433,7 @@
         <p><span data-show="ko">완료라고 말한 걸 독립 검증자가 다시 봐요. 진짜 했는지, 테스트는 돌렸는지, 시킨 것만 했는지 <b>증거</b>로 확인해요.</span><span data-show="en">An independent verifier re-checks what you called done. Did it really happen, did the tests actually run, did you stick to what was asked — against the <b>evidence</b>.</span></p>
       </div>
       <div class="loop wide">
-        <div class="top"><span class="role"><span data-show="ko">기록</span><span data-show="en">Record</span></span><code>/document</code></div>
+        <div class="top"><span class="role"><span data-show="ko">기록</span><span data-show="en">Record</span></span><code>/worklog</code></div>
         <p><span data-show="ko">세션을 정리한 worklog를 남겨요. 원하면 Nova 톤의 단독 HTML로도 뽑고요. 한 일이 그냥 사라지지 않아요.</span><span data-show="en">Leaves a worklog that sums up the session, and if you want, a standalone HTML in Nova's style. What you did doesn't just vanish.</span></p>
       </div>
     </div>
@@ -559,7 +559,7 @@
     </div>
 
     <ul class="facts">
-      <li><span data-show="ko">커맨드 5개: <code>/claude-md</code> · <code>/learn</code> · <code>/handoff</code> · <code>/gate</code> · <code>/document</code>.</span><span data-show="en">Five commands: <code>/claude-md</code> · <code>/learn</code> · <code>/handoff</code> · <code>/gate</code> · <code>/document</code>.</span></li>
+      <li><span data-show="ko">커맨드 5개: <code>/claude-md</code> · <code>/learn</code> · <code>/handoff</code> · <code>/gate</code> · <code>/worklog</code>.</span><span data-show="en">Five commands: <code>/claude-md</code> · <code>/learn</code> · <code>/handoff</code> · <code>/gate</code> · <code>/worklog</code>.</span></li>
       <li><span data-show="ko">훅은 프로젝트별로 켜요. <code>docs/handoff/</code>가 있으면 handoff가, <code>.nova/gate.on</code>이 있으면 gate 넛지가 돌아요. 켜기 전엔 아무것도 안 떠요.</span><span data-show="en">Hooks are opt-in per project — <code>docs/handoff/</code> activates handoff, <code>.nova/gate.on</code> activates the gate nudge. Nothing fires until you opt in.</span></li>
       <li><span data-show="ko">기존 <code>cc-skills</code>랑 <code>cc-handoff</code>를 합쳐서 대체해요(둘은 Nova를 가리키는 deprecation 배너만 남아요).</span><span data-show="en">Consolidates and replaces the standalone <code>cc-skills</code> and <code>cc-handoff</code> (both now point here via a deprecation banner).</span></li>
       <li><span data-show="ko">semver + GitHub Releases · 현재 <b>v0.2.1</b> · 내부 도구 <b>0 의존</b> · MIT.</span><span data-show="en">semver + GitHub Releases · currently <b>v0.2.1</b> · <b>zero</b> internal dependencies · MIT.</span></li>

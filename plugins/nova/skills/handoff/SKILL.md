@@ -101,7 +101,7 @@ What you were doing / where you got to / what you just finished.
 1. The current branch's work is complete (e.g. merged or abandoned). **Delete** `docs/handoff/<slug>.md` (`git rm docs/handoff/<slug>.md` if tracked, else `rm -f`).
 2. The closure record is the commit message, not a lingering file — suggest a message like `chore(handoff): resolve <slug> (merged in #42)`.
 3. Offer to commit (don't commit without approval). Do **not** delete any other branch's file here.
-4. Resolve is the natural moment for the durable record: if the finished work was meaningful (multi-session, non-obvious decisions), suggest `/document` — the handoff dies here, but the *why* deserves to survive.
+4. Resolve is the natural moment for the durable record: if the finished work was meaningful (multi-session, non-obvious decisions), suggest `/worklog` — the handoff dies here, but the *why* deserves to survive.
 
 ## Procedure — `prune` (clean up orphans)
 

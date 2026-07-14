@@ -123,7 +123,7 @@ cd /Users/keunsik/develop/givepro91/nova && git add plugins/nova/skills/scout/SK
 - [ ] **Step 1: README 현재 표 확인**
 
 Run: `cd /Users/keunsik/develop/givepro91/nova && sed -n '/## The loops/,/## Install/p' README.md`
-Expected: 5행 loop 표(`/document`까지) 확인, `design-direction`·`scout` 없음 확인.
+Expected: 5행 loop 표(`/worklog`까지) 확인, `design-direction`·`scout` 없음 확인.
 
 - [ ] **Step 2: README에 capabilities 구분 추가** — 기존 "## The loops" 표는 **세션 5-loop**로 유지하고, 표 아래에 아래 섹션을 신설한다.
 

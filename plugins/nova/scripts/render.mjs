@@ -122,7 +122,7 @@ function assemble(blocks, verdictHtml, display, date) {
   const h1 = `<h1>${inline(display)}</h1>`;
   const masthead = `<header class="masthead">${brand}\n${h1}\n${verdictHtml}\n${intro.join('\n')}</header>\n<div class="rule"></div>`;
   const nav = toc.length > 1 ? `<nav class="toc" aria-label="sections">${toc.join('')}</nav>` : '';
-  return `${masthead}\n${nav}\n${sections.join('\n')}\n<footer class="foot">nova · worklog · /document</footer>`;
+  return `${masthead}\n${nav}\n${sections.join('\n')}\n<footer class="foot">nova · worklog · /worklog</footer>`;
 }
 
 // prose lint lives in ./lint-prose.mjs (shared with handoff) — imported above.

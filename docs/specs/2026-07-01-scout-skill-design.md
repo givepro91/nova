@@ -23,7 +23,7 @@ revision: 3 (재검토 SHIP + N1~N5 미세 흡수)
 - Nova는 "내(Jay) 개발을 세션을 가로질러 복리로 돕는 플러그인"이고, mission은 "keeping(상태 보존)"에
   갇히지 않는다 (CLAUDE.md thesis 2026-07-01 개정 반영). `/scout`는 **세션 5-loop이 아니라 capability**다.
   - **loops (세션 위 5개):** rules(`/claude-md`) · learning(`/learn`) · continuity(`/handoff`) ·
-    verification(`/gate`) · record(`/document`↔worklog).
+    verification(`/gate`) · record(`/worklog`).
   - **capabilities (loop이 아닌 스킬):** `design-direction`(기존, 현재 README 미기재) · **`scout`(신규)**.
   - ⇒ README/CLAUDE의 "5 loops" 프레이밍은 이미 낡음. §7에서 loops/capabilities를 분리해 정정한다.
 - **바이브코딩 시대 전제:** 코드는 점점 AI가 양산한다 → (a) 깔끔한 코드 *패턴*보다 **의도**

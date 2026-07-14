@@ -1,0 +1,63 @@
+/* ============================================================
+   web-doc style: editorial  —  showcase / portfolio / proposal / landing
+   Signature: hero · strong display type · big stats · scroll reveal
+   Commit to one confident accent; keep everything else quiet.
+   System fonts (heavy weights stand in for a display face) · light + dark
+   Skeleton: .hero(.display/.tagline) + .block(h2) + .stat(.num/.cap)
+   ============================================================ */
+:root{
+  --bg:#ffffff; --ink:#16181d; --text:#2c2f36; --muted:#6a707a; --border:#eceef1;
+  --surface:#f6f7f9; --accent:#1f7a6d; --accent-2:#0f4d45;   /* deep teal, single emphasis */
+  --code-bg:#f4f5f7; --code-tx:#2c2f36;
+  --f-sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Segoe UI",Roboto,sans-serif;
+  --f-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --maxw:900px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#101215; --ink:#f4f5f7; --text:#d6d9de; --muted:#8a919c; --border:#242830;
+  --surface:#191c21; --accent:#4fbfae; --accent-2:#7fd6c8; --code-bg:#1b1e23; --code-tx:#d6d9de;
+}}
+:root[data-theme="dark"]{
+  --bg:#101215; --ink:#f4f5f7; --text:#d6d9de; --muted:#8a919c; --border:#242830;
+  --surface:#191c21; --accent:#4fbfae; --accent-2:#7fd6c8; --code-bg:#1b1e23; --code-tx:#d6d9de;
+}
+:root[data-theme="light"]{
+  --bg:#ffffff; --ink:#16181d; --text:#2c2f36; --muted:#6a707a; --border:#eceef1;
+  --surface:#f6f7f9; --accent:#1f7a6d; --accent-2:#0f4d45; --code-bg:#f4f5f7; --code-tx:#2c2f36;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}
+  .reveal{opacity:1!important; transform:none!important}}
+body{margin:0; background:var(--bg); color:var(--text); font-family:var(--f-sans);
+  font-size:17px; line-height:1.68; -webkit-font-smoothing:antialiased; letter-spacing:-0.006em}
+.container{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+
+/* hero = thesis */
+.hero{min-height:64vh; display:flex; flex-direction:column; justify-content:center; padding:80px 0 56px}
+.hero .eyebrow{font-size:13px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); margin-bottom:20px}
+.display{font-size:clamp(40px,7vw,76px); line-height:1.02; font-weight:850; letter-spacing:-0.035em;
+  color:var(--ink); margin:0 0 22px; text-wrap:balance}
+.tagline{font-size:clamp(18px,2.4vw,23px); color:var(--muted); max-width:620px; margin:0; font-weight:400}
+
+.block{padding:56px 0; border-top:1px solid var(--border)}
+.block h2{font-size:clamp(24px,3.4vw,34px); font-weight:800; letter-spacing:-0.02em; color:var(--ink); margin:0 0 18px; text-wrap:balance}
+.block p{max-width:64ch; margin:0 0 16px}
+.block .lead{font-size:19px; color:var(--text)}
+
+/* big stats */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:24px; margin:28px 0}
+.stat{border-left:3px solid var(--accent); padding-left:16px}
+.stat .num{display:block; font-size:clamp(30px,4vw,44px); font-weight:850; letter-spacing:-0.03em; color:var(--ink); font-variant-numeric:tabular-nums}
+.stat .cap{display:block; font-size:14px; color:var(--muted); margin-top:4px}
+
+a.link{color:var(--accent); text-decoration:none; font-weight:600; border-bottom:2px solid transparent}
+a.link:hover{border-bottom-color:var(--accent)}
+a.link:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+code{font-family:var(--f-mono); font-size:0.85em; background:var(--code-bg); color:var(--code-tx); padding:2px 6px; border-radius:5px}
+
+/* scroll reveal — add .in via IntersectionObserver */
+.reveal{opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1; transform:none}

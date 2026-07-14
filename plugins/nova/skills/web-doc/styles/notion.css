@@ -1,0 +1,94 @@
+/* ============================================================
+   web-doc style: notion  —  quiet reading docs / notes / prep (default)
+   Signature: sidebar TOC · <details> toggles · calm 3-color callouts
+   System fonts · light + dark · inline into <style> to stay self-contained
+   Skeleton: .wrap > (.side .nav) + main > .head / .p-title / details.q / .cb
+   ============================================================ */
+:root{
+  --bg:#ffffff; --surface:#f7f6f3; --surface-2:#efece7;
+  --text:#37352f; --muted:#6b6459; --border:#e8e6e1;
+  --accent:#3f6a8a; --accent-soft:#eef4f8;
+  --evi-bg:#f0f6f1; --evi-bd:#cfe4d4; --evi-ac:#3f7a52;   /* ✅ evidence */
+  --hon-bg:#fbf6ec; --hon-bd:#ecdcbf; --hon-ac:#a9772a;   /* ⚖️ boundary (signature) */
+  --cs-bg:#eef4f8;  --cs-bd:#d3e3ee;  --cs-ac:#3f6a8a;    /* 💡 summary */
+  --code-bg:#f5f3ef; --code-tx:#3b3a35;
+  --f-sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --maxw:760px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#1e1e1c; --surface:#262624; --surface-2:#2f2f2c;
+  --text:#e4e2dc; --muted:#a49d92; --border:#38362f;
+  --accent:#8fb8d4; --accent-soft:#1b2830;
+  --evi-bg:#1c2a20; --evi-bd:#2f4636; --evi-ac:#83bd97;
+  --hon-bg:#2a2317; --hon-bd:#4a3d24; --hon-ac:#d6ab63;
+  --cs-bg:#1b2830;  --cs-bd:#2b4150;  --cs-ac:#8fb8d4;
+  --code-bg:#2a2926; --code-tx:#d8d5cd;
+}}
+:root[data-theme="dark"]{
+  --bg:#1e1e1c; --surface:#262624; --surface-2:#2f2f2c;
+  --text:#e4e2dc; --muted:#a49d92; --border:#38362f; --accent:#8fb8d4; --accent-soft:#1b2830;
+  --evi-bg:#1c2a20; --evi-bd:#2f4636; --evi-ac:#83bd97; --hon-bg:#2a2317; --hon-bd:#4a3d24; --hon-ac:#d6ab63;
+  --cs-bg:#1b2830; --cs-bd:#2b4150; --cs-ac:#8fb8d4; --code-bg:#2a2926; --code-tx:#d8d5cd;
+}
+:root[data-theme="light"]{
+  --bg:#ffffff; --surface:#f7f6f3; --surface-2:#efece7;
+  --text:#37352f; --muted:#6b6459; --border:#e8e6e1; --accent:#3f6a8a; --accent-soft:#eef4f8;
+  --evi-bg:#f0f6f1; --evi-bd:#cfe4d4; --evi-ac:#3f7a52; --hon-bg:#fbf6ec; --hon-bd:#ecdcbf; --hon-ac:#a9772a;
+  --cs-bg:#eef4f8; --cs-bd:#d3e3ee; --cs-ac:#3f6a8a; --code-bg:#f5f3ef; --code-tx:#3b3a35;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0; background:var(--bg); color:var(--text); font-family:var(--f-sans);
+  font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased; letter-spacing:-0.003em}
+
+.wrap{max-width:1120px; margin:0 auto; padding:0 28px; display:grid; grid-template-columns:232px minmax(0,1fr); gap:52px}
+@media (max-width:920px){.wrap{grid-template-columns:1fr; gap:0}}
+
+.side{position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; padding:34px 0 40px}
+@media (max-width:920px){.side{position:static; height:auto; padding:24px 0 4px; border-bottom:1px solid var(--border)}}
+.nav{display:flex; flex-direction:column; gap:1px}
+.nav a{color:var(--muted); text-decoration:none; font-size:13.5px; padding:6px 10px; border-radius:6px}
+.nav a:hover{background:var(--surface); color:var(--text)}
+.nav a.on{background:var(--surface-2); color:var(--text); font-weight:600}
+
+main{padding:44px 0 120px; min-width:0}
+.head{max-width:var(--maxw)}
+h1{font-size:33px; line-height:1.22; font-weight:800; letter-spacing:-0.02em; margin:12px 0 14px; text-wrap:balance}
+.lede{font-size:16.5px; color:var(--muted); margin:0 0 18px; max-width:640px}
+.p-title{max-width:var(--maxw); border-top:1px solid var(--border); padding-top:26px; margin-top:46px}
+.p-title h2{font-size:13px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); margin:0}
+
+details.q{max-width:var(--maxw); border-bottom:1px solid var(--border)}
+details.q>summary{list-style:none; cursor:pointer; padding:15px 4px 15px 30px; position:relative;
+  font-size:16.5px; font-weight:600; letter-spacing:-0.01em}
+details.q>summary::-webkit-details-marker{display:none}
+details.q>summary::before{content:"›"; position:absolute; left:6px; top:13px; font-size:19px;
+  color:var(--muted); font-weight:700; transition:transform .15s ease}
+details.q[open]>summary::before{transform:rotate(90deg)}
+details.q>summary:hover{color:var(--accent)}
+details.q>summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px}
+details.q .body{padding:2px 4px 22px 30px}
+.body p{margin:0 0 12px} .body ul,.body ol{margin:0 0 12px; padding-left:20px} .body li{margin:5px 0}
+.body h4{font-size:14px; font-weight:700; margin:18px 0 8px}
+
+code{font-family:var(--f-mono); font-size:0.86em; background:var(--code-bg); color:var(--code-tx); padding:1.5px 5px; border-radius:5px}
+pre{background:var(--code-bg); color:var(--code-tx); border:1px solid var(--border); border-radius:8px;
+  padding:13px 15px; overflow-x:auto; font-family:var(--f-mono); font-size:13px; line-height:1.6; margin:0 0 14px}
+pre code{background:none; padding:0; font-size:inherit}
+
+/* 3-color callouts — the signature. Color encodes evidence / boundary / summary */
+.cb{border:1px solid; border-radius:9px; padding:12px 14px 12px 42px; position:relative; margin:0 0 14px; font-size:14.5px; line-height:1.62}
+.cb::before{position:absolute; left:14px; top:11px; font-size:15px}
+.cb .t{display:block; font-weight:700; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:3px}
+.cb p{margin:0 0 6px} .cb p:last-child{margin:0}
+.cb.evi{background:var(--evi-bg); border-color:var(--evi-bd)} .cb.evi::before{content:"✅"} .cb.evi .t{color:var(--evi-ac)}
+.cb.hon{background:var(--hon-bg); border-color:var(--hon-bd)} .cb.hon::before{content:"⚖️"} .cb.hon .t{color:var(--hon-ac)}
+.cb.cs{background:var(--cs-bg); border-color:var(--cs-bd)} .cb.cs::before{content:"💡"} .cb.cs .t{color:var(--cs-ac)}
+
+.tw{max-width:var(--maxw); overflow-x:auto; margin:0 0 14px}
+table{border-collapse:collapse; width:100%; font-size:13.5px}
+th,td{border:1px solid var(--border); padding:8px 11px; text-align:left; vertical-align:top}
+th{background:var(--surface); font-weight:600; font-size:12.5px}

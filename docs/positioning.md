@@ -39,13 +39,13 @@
 - 시장을 적대적으로 분석해 **흡수 불가능한 niche**를 찾았다: **세션 정직성**(completion theater — 에이전트가 몰래 코너 컷하고 "done"이라 보고하는 것). 자율성(Auto Mode·subagent)이 오를수록 **가치가 커지고**, 플랫폼은 *자기 제품이 거짓말한다는 게이트*를 구조적으로 만들지 않는다.
 - **철학 전환**: v1은 *doer*(에이전트를 오케스트레이션 — 플랫폼/omc와 경쟁). v2는 ***keeper***(에이전트 *주위*의 상태·규칙·기록·검증 — 플랫폼이 점유하지 않은 레이어).
 - 형태: **단일 `nova` 플러그인**, 세션을 원료로 한 **5개 loop**.
-  - **규칙**(`/claude-md`) · **학습**(`/learn`) · **연속성**(`/handoff`) · **검증**(`/gate`) · **기록**(`/document`)
+  - **규칙**(`/claude-md`) · **학습**(`/learn`) · **연속성**(`/handoff`) · **검증**(`/gate`) · **기록**(`/worklog`)
 
 ---
 
 ## 4. 장점 / 차별점 (랜딩의 "왜 좋은가")
 
-1. **복리(compounding)** — 매 세션이 다음 세션을 개선한다: 실수→규칙(`/learn`), 열린 작업→연속성(`/handoff`), 완료→정직성 감사(`/gate`), 한 일→durable 기록(`/document`). 리셋되지 않는다.
+1. **복리(compounding)** — 매 세션이 다음 세션을 개선한다: 실수→규칙(`/learn`), 열린 작업→연속성(`/handoff`), 완료→정직성 감사(`/gate`), 한 일→durable 기록(`/worklog`). 리셋되지 않는다.
 2. **흡수 불가 차별점 = 정직성 게이트** — `/gate`가 **독립 검증자**(별도 컨텍스트)를 띄워 세션의 *주장(claim)*을 *증거(evidence)*에 대조한다: 테스트 진짜 돌렸나? 범위 지켰나? 미검증을 done으로 포장했나? (diff만 보는 코드리뷰가 못 잡는 것.)
 3. **Lean — 저컨텍스트-세금** — 단일 플러그인, 훅은 전부 **opt-in**(안 켜면 조용). v1의 상시-on 무거움과 정반대.
 4. **정직 · git-native · portable** — 회사 내부 도구에 **0 의존**(완전 self-contained), git이 진실원, 한 줄 설치.
@@ -77,7 +77,7 @@
   /plugin marketplace add givepro91/nova
   /plugin install nova@nova
   ```
-- 커맨드 5개: `/claude-md` · `/learn` · `/handoff` · `/gate` · `/document`. 훅은 프로젝트별 opt-in(`docs/handoff/`, `.nova/gate.on`).
+- 커맨드 5개: `/claude-md` · `/learn` · `/handoff` · `/gate` · `/worklog`. 훅은 프로젝트별 opt-in(`docs/handoff/`, `.nova/gate.on`).
 - 대체: 기존 `cc-skills`·`cc-handoff`를 통합·대체(둘은 deprecation 배너로 nova를 가리킴).
 
 ---
