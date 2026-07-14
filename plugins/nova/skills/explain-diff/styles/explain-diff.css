@@ -1,0 +1,302 @@
+/*
+ * Nova · explain-diff skeleton — the reusable quality floor for a code-change explainer.
+ * Inline this whole file into a <style> in the single self-contained .html the skill produces.
+ *
+ * Self-contained: no @import, no CDN, no webfont — system fonts only (CSP-safe, offline).
+ * Themes: light + dark via prefers-color-scheme AND :root[data-theme] (manual toggle wins).
+ * a11y: AA contrast both themes · :focus-visible · prefers-reduced-motion · .sr live regions.
+ * Brand: Nova violet (#7c3aed / #a855f7 / #6d28d9).
+ *
+ * Reusable component families (pick a SMALL set per change and reuse them — never ASCII diagrams):
+ *   .tldr  한눈에 card (핵심 결론을 첫 화면으로)       .skip  배경 건너뛰기 callout
+ *   .flow  단계/데이터 흐름 다이어그램 (.step/.dot/.bar)   .tally 라벨 막대·임계선 차트
+ *   table.tax  분류·대응 표          .note  개념/주의 callout
+ *   .q/.opt/.fb  퀴즈 카드           aside.rail + #prog  sticky 목차 scroll-spy + 진행률
+ *
+ * Reference JS (theme toggle · hash-synced scroll-spy · SHUFFLED quiz) is at the bottom of
+ * this file in a comment block — copy it into a <script> and fill QUESTIONS from the change.
+ */
+
+:root{
+  --violet:#7c3aed; --violet-lt:#a855f7; --violet-dp:#6d28d9;
+  --bg:#faf9fc; --card:#ffffff; --ink:#1b1922; --ink-2:#403c50; --ink-3:#5b5670;
+  --line:#e7e3ef; --line-2:#d7d0e6; --code-bg:#f3f0fa; --code-ink:#28223a;
+  --ok:#137a37; --ok-bg:#e7f6ec; --no:#b3181c; --no-bg:#fbeaea;
+  --note-bg:#f3effc; --note-line:#d9cdf5;
+  --content:720px; --rail:236px; --gap:52px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141220; --card:#1c1a29; --ink:#eceaf3; --ink-2:#c2bdd2; --ink-3:#9c97b0;
+    --line:#2e2a3e; --line-2:#3c374f; --code-bg:#221f30; --code-ink:#d9d4e8;
+    --ok:#4ade80; --ok-bg:#153322; --no:#f87171; --no-bg:#3a1c1c;
+    --note-bg:#221c33; --note-line:#4a3a6b; --violet:#a855f7; --violet-dp:#c79bf7; --violet-lt:#c084fc;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141220; --card:#1c1a29; --ink:#eceaf3; --ink-2:#c2bdd2; --ink-3:#9c97b0;
+  --line:#2e2a3e; --line-2:#3c374f; --code-bg:#221f30; --code-ink:#d9d4e8;
+  --ok:#4ade80; --ok-bg:#153322; --no:#f87171; --no-bg:#3a1c1c;
+  --note-bg:#221c33; --note-line:#4a3a6b; --violet:#a855f7; --violet-dp:#c79bf7; --violet-lt:#c084fc;
+}
+:root[data-theme="light"]{
+  --bg:#faf9fc; --card:#ffffff; --ink:#1b1922; --ink-2:#403c50; --ink-3:#5b5670;
+  --line:#e7e3ef; --line-2:#d7d0e6; --code-bg:#f3f0fa; --code-ink:#28223a;
+  --ok:#137a37; --ok-bg:#e7f6ec; --no:#b3181c; --no-bg:#fbeaea;
+  --note-bg:#f3effc; --note-line:#d9cdf5; --violet:#7c3aed; --violet-dp:#6d28d9; --violet-lt:#a855f7;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Segoe UI",Roboto,sans-serif;
+  line-height:1.72; font-size:17.5px; -webkit-text-size-adjust:100%; -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2.5px solid var(--violet); outline-offset:3px; border-radius:6px}
+.sr{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0}
+
+/* progress bar */
+#prog{position:fixed; top:0; left:0; height:3px; width:0; background:linear-gradient(90deg,var(--violet-lt),var(--violet)); z-index:20; transition:width .1s linear}
+
+.page{max-width:1092px; margin:0 auto; padding:0 28px 120px}
+header.hero{max-width:var(--content); padding:60px 0 8px}
+.eyebrow{font-size:13px; letter-spacing:.09em; text-transform:uppercase; color:var(--violet); font-weight:700}
+h1{font-size:32px; line-height:1.24; margin:.4em 0 .35em; letter-spacing:-.015em; font-weight:720}
+.sub{color:var(--ink-2); font-size:18px; margin:0; line-height:1.6}
+.meta{margin-top:20px; display:flex; flex-wrap:wrap; gap:7px}
+.chip{font-size:13px; padding:5px 11px; border-radius:8px; color:var(--ink-2); background:var(--code-bg); border:1px solid var(--line)}
+.chip code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--violet); font-size:.92em}
+
+/* two-column layout */
+.layout{display:grid; grid-template-columns:minmax(0,1fr) var(--rail); gap:var(--gap); align-items:start; margin-top:30px}
+main{max-width:var(--content); min-width:0}
+
+/* right sticky rail with scroll-spy */
+aside.rail{position:sticky; top:26px; align-self:start}
+aside.rail .railbox{border-left:2px solid var(--line); padding-left:2px}
+aside.rail b{display:block; font-size:11.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); padding:0 0 10px 14px; font-weight:700}
+aside.rail a{position:relative; display:flex; align-items:baseline; gap:8px; text-decoration:none; font-size:14.5px; color:var(--ink-2);
+             padding:7px 12px 7px 14px; margin-left:-2px; border-left:2px solid transparent; border-radius:0 8px 8px 0; transition:color .12s, border-color .12s, background .12s}
+aside.rail a .n{font-variant-numeric:tabular-nums; font-size:12px; opacity:.75}
+aside.rail a:hover{color:var(--ink); background:var(--note-bg)}
+aside.rail a[aria-current="true"]{color:var(--violet-dp); border-left-color:var(--violet); background:var(--note-bg); font-weight:660}
+aside.rail a[aria-current="true"] .n{opacity:1; color:var(--violet)}
+aside.rail a::after{content:"→"; margin-left:auto; opacity:0; transform:translateX(-4px); transition:opacity .12s, transform .12s; color:var(--violet)}
+aside.rail a:hover::after,aside.rail a[aria-current="true"]::after{opacity:.9; transform:none}
+
+h2{font-size:24px; margin:2.5em 0 .55em; letter-spacing:-.01em; scroll-margin-top:26px; font-weight:700}
+h2 .num{color:var(--violet); font-variant-numeric:tabular-nums; margin-right:.42em}
+h3{font-size:18.5px; margin:1.9em 0 .45em; color:var(--ink); font-weight:660}
+p{margin:.72em 0}
+a{color:var(--violet-dp)}
+strong{font-weight:680}
+ul{padding-left:1.25em}
+li{margin:.3em 0}
+hr{border:0; border-top:1px solid var(--line); margin:2.4em 0}
+
+/* TL;DR card */
+.tldr{background:var(--card); border:1px solid var(--line-2); border-radius:16px; padding:20px 24px; margin:4px 0 8px;
+      box-shadow:0 1px 0 rgba(124,58,237,.04), 0 8px 30px -20px rgba(124,58,237,.35)}
+.tldr .tag{display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:.08em; color:var(--violet); text-transform:uppercase; margin-bottom:6px}
+.tldr p{margin:.3em 0; font-size:17px; color:var(--ink)}
+.tldr .big{font-size:18.5px; font-weight:640; line-height:1.55}
+.tldr em{font-style:normal; background:linear-gradient(transparent 62%, color-mix(in srgb, var(--violet-lt) 34%, transparent) 0); padding:0 2px; font-weight:700; color:var(--ink)}
+
+/* skip → callout */
+.skip{display:flex; gap:12px; align-items:flex-start; background:var(--note-bg); border:1px solid var(--note-line);
+      border-left:3px solid var(--violet); border-radius:12px; padding:13px 16px; margin:1.3em 0; font-size:15.5px; color:var(--ink-2)}
+.skip .ic{flex:0 0 auto; color:var(--violet); font-size:17px; line-height:1.5}
+.skip a{font-weight:640; white-space:nowrap}
+
+.note{background:var(--note-bg); border:1px solid var(--note-line); border-left:3px solid var(--violet); border-radius:12px; padding:14px 18px; margin:1.3em 0; font-size:16.5px}
+.note b{color:var(--violet-dp)}
+
+pre{background:var(--code-bg); color:var(--code-ink); border:1px solid var(--line); border-radius:12px;
+    padding:16px 18px; overflow-x:auto; white-space:pre; font-size:14px; line-height:1.62;
+    font-family:ui-monospace,SFMono-Regular,Menlo,"Cascadia Code",monospace; margin:1.2em 0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.88em;
+     background:var(--code-bg); padding:1.5px 6px; border-radius:6px; color:var(--code-ink)}
+pre code{background:none; padding:0}
+.cmt{color:var(--ink-3)}
+.kw{color:var(--violet); font-weight:600}
+/* code + wide tables break out slightly past prose on desktop */
+@media (min-width:981px){
+  main > pre, main > .tally, main > table.tax, .flow{margin-left:-12px; margin-right:-28px}
+  main > pre{padding-left:18px}
+}
+
+.flow{display:flex; flex-direction:column; margin:1.5em 0}
+.flow .step{display:flex; align-items:flex-start; gap:15px}
+.flow .rail-i{display:flex; flex-direction:column; align-items:center; flex:0 0 auto}
+.flow .dot{width:32px; height:32px; border-radius:9px; background:var(--violet); color:#fff; display:flex;
+           align-items:center; justify-content:center; font-size:14.5px; font-weight:700; flex:0 0 auto}
+.flow .bar{width:2px; flex:1 1 auto; min-height:24px; background:var(--note-line)}
+.flow .body{padding-bottom:20px; padding-top:4px}
+.flow .body b{display:block; font-size:16px}
+.flow .body span{font-size:14.5px; color:var(--ink-2)}
+.flow .body code{font-size:12.5px}
+
+.tally{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; margin:1.5em 0}
+.tally .row{display:grid; grid-template-columns:180px 1fr auto; align-items:center; gap:14px; margin:10px 0}
+.tally .lbl{font-size:13px; color:var(--ink-2); font-family:ui-monospace,Menlo,monospace}
+.tally .track{background:var(--code-bg); border-radius:7px; height:28px; position:relative; overflow:hidden}
+.tally .fill{height:100%; background:linear-gradient(90deg,var(--violet-lt),var(--violet)); display:flex; align-items:center; padding-left:9px; color:#fff; font-size:12.5px; font-weight:700}
+.tally .fill.under{background:var(--line-2); color:var(--ink-3)}
+.tally .verdict{font-size:13px; font-weight:700; white-space:nowrap}
+.tally .verdict.up{color:var(--violet-dp)}
+.tally .verdict.hold{color:var(--ink-3)}
+.tally .thresh{position:absolute; top:-7px; bottom:-7px; left:66.6%; width:2px; background:var(--no); opacity:.6}
+.tally .cap{font-size:13px; color:var(--ink-3); margin-top:12px; text-align:center}
+
+table.tax{width:100%; border-collapse:collapse; font-size:14px; margin:1.3em 0; display:block; overflow-x:auto}
+table.tax th,table.tax td{border:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+table.tax th{background:var(--note-bg); color:var(--ink); font-weight:660; white-space:nowrap}
+table.tax code{font-size:12px; white-space:nowrap}
+
+/* quiz */
+.q{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin:18px 0}
+.q .qnum{font-size:12.5px; color:var(--violet); font-weight:700; letter-spacing:.05em}
+.q .qtext{font-weight:620; margin:.35em 0 1em; font-size:17px}
+.q .qtext code{font-size:.85em}
+.opt{display:block; width:100%; text-align:left; border:1.5px solid var(--line); background:var(--bg);
+     color:var(--ink); border-radius:11px; padding:12px 15px; margin:9px 0; font:inherit; font-size:15.5px;
+     cursor:pointer; transition:border-color .12s, background .12s}
+.opt:hover:not(:disabled){border-color:var(--violet)}
+.opt:disabled{cursor:default; opacity:.92}
+.opt.correct{border-color:var(--ok); background:var(--ok-bg)}
+.opt.wrong{border-color:var(--no); background:var(--no-bg)}
+.opt .mark{font-weight:800; margin-right:9px; color:var(--ink-3)}
+.opt.correct .mark{color:var(--ok)} .opt.wrong .mark{color:var(--no)}
+.fb{display:none; font-size:15px; border-radius:11px; padding:12px 15px; margin-top:11px; line-height:1.62}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-bg); color:var(--ok); border:1px solid var(--ok)}
+.fb.no{background:var(--no-bg); color:var(--no); border:1px solid var(--no)}
+#score{position:sticky; bottom:18px; margin:26px auto 0; max-width:340px; text-align:center;
+       background:var(--violet); color:#fff; border-radius:999px; padding:11px 18px; font-weight:700; font-size:15.5px;
+       box-shadow:0 8px 26px -6px rgba(124,58,237,.5)}
+.gate-line{margin-top:16px; font-size:15.5px; color:var(--ink-2); background:var(--ok-bg); border:1px solid var(--ok); border-radius:12px; padding:12px 16px}
+.gate-line b{color:var(--ok)}
+
+.themebtn{position:fixed; top:16px; right:16px; z-index:21; background:var(--card); color:var(--ink-2);
+          border:1px solid var(--line-2); border-radius:12px; width:44px; height:44px; font-size:19px; cursor:pointer;
+          display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px -4px rgba(0,0,0,.25)}
+.themebtn:hover{color:var(--violet); border-color:var(--violet)}
+
+.footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--line); font-size:14.5px; color:var(--ink-3); max-width:var(--content)}
+.footer small{font-size:13.5px}
+
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr; gap:0}
+  aside.rail{position:static; margin:22px 0 4px; order:-1}
+  aside.rail .railbox{border-left:0; border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+  aside.rail b{padding:0; width:100%}
+  aside.rail a{border-left:0; border:1px solid var(--line); border-radius:999px; padding:6px 13px; margin:0}
+  aside.rail a::after{display:none}
+  aside.rail a[aria-current="true"]{border-color:var(--violet)}
+}
+@media (max-width:560px){
+  body{font-size:17px}
+  .page{padding:0 18px 100px}
+  h1{font-size:27px}
+  .tally .row{grid-template-columns:1fr; gap:6px}
+  .tally .thresh{display:none}
+  header.hero{padding-top:44px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; scroll-behavior:auto!important}}
+
+
+/* =====================================================================
+ * Reference JS — copy into a <script> tag (NOT into CSS). Fill QUESTIONS.
+ * =====================================================================
+// ---- theme toggle (light / dark; system default) ----
+(function(){
+  var root=document.documentElement, btn=document.getElementById('themebtn');
+  if(!btn) return;
+  function label(){
+    var t=root.getAttribute('data-theme');
+    btn.setAttribute('aria-pressed', t==='dark' ? 'true':'false');
+    btn.setAttribute('aria-label','테마 전환 (현재: '+(t? (t==='dark'?'다크':'라이트') : '시스템 설정')+')');
+  }
+  btn.addEventListener('click',function(){
+    var cur=root.getAttribute('data-theme');
+    var next = cur==='dark' ? 'light' : cur==='light' ? 'dark'
+      : (matchMedia('(prefers-color-scheme: dark)').matches ? 'light':'dark');
+    root.setAttribute('data-theme',next); label();
+  });
+  label();
+})();
+
+// ---- scroll progress + scroll-spy (URL hash stays in sync with the active section) ----
+(function(){
+  var prog=document.getElementById('prog');
+  var spy=[].slice.call(document.querySelectorAll('aside.rail a[data-spy]'));
+  var sections=spy.map(function(a){ return document.getElementById(a.getAttribute('data-spy')); });
+  function setActive(idx){
+    spy.forEach(function(a,i){ a.setAttribute('aria-current', i===idx?'true':'false'); });
+    if(idx>=0){
+      var id=spy[idx].getAttribute('data-spy');
+      if(location.hash.slice(1)!==id) history.replaceState(null,'',location.pathname+location.search+'#'+id);
+    }
+  }
+  function onScroll(){
+    var h=document.documentElement, sc=h.scrollTop, max=h.scrollHeight-h.clientHeight;
+    if(prog) prog.style.width=(max>0?(sc/max*100):0)+'%';
+    var idx=-1; // above the first section → nothing highlighted, hash untouched
+    for(var i=0;i<sections.length;i++){ if(sections[i].getBoundingClientRect().top<=120) idx=i; }
+    setActive(idx);
+  }
+  spy.forEach(function(a,i){
+    a.addEventListener('click',function(e){ e.preventDefault(); sections[i].scrollIntoView({behavior:'smooth',block:'start'}); setActive(i); });
+  });
+  addEventListener('scroll',onScroll,{passive:true}); addEventListener('resize',onScroll);
+  addEventListener('hashchange',onScroll); onScroll();
+})();
+
+// ---- comprehension quiz ----
+// Correctness is keyed off `ok`, not position. Options are SHUFFLED at render time,
+// so a reader can never pick the answer by its length or slot — the gist's known flaw.
+// Replace QUESTIONS with 5 medium-difficulty items derived from THIS change.
+(function(){
+  var QUESTIONS=[
+    { q:'질문 (이 변경의 실질을 이해해야 풀 수 있게, gotcha 는 금지) …',
+      opts:[
+        {t:'정답 보기', ok:true,  why:'왜 맞는지 — 코드/설계 근거로 설명.'},
+        {t:'그럴듯한 오답', ok:false, why:'왜 틀렸는지 — 흔한 오해를 콕 집어 교정.'},
+        {t:'그럴듯한 오답', ok:false, why:'왜 틀렸는지.'},
+        {t:'그럴듯한 오답', ok:false, why:'왜 틀렸는지.'}
+      ]}
+    // … 총 5문항 …
+  ];
+  function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  var quiz=document.getElementById('quiz'), scoreEl=document.getElementById('score'),
+      gateEl=document.getElementById('gateline'), live=document.getElementById('live');
+  if(!quiz) return;
+  var total=QUESTIONS.length, answered=0, correct=0;
+  QUESTIONS.forEach(function(item,qi){
+    var opts=shuffle(item.opts.slice());
+    var card=document.createElement('div'); card.className='q';
+    var h=document.createElement('div'); h.className='qnum'; h.textContent='Q'+(qi+1)+' / '+total; card.appendChild(h);
+    var qt=document.createElement('div'); qt.className='qtext'; qt.innerHTML=item.q; card.appendChild(qt);
+    var fb=document.createElement('div'); fb.className='fb';
+    opts.forEach(function(opt,oi){
+      var b=document.createElement('button'); b.className='opt'; b.type='button';
+      b.innerHTML='<span class="mark" aria-hidden="true">'+String.fromCharCode(65+oi)+'</span>'+opt.t;
+      b.addEventListener('click',function(){
+        if(card.dataset.done) return;
+        card.dataset.done='1'; answered++;
+        var kids=card.querySelectorAll('.opt');
+        kids.forEach(function(k){ k.disabled=true; });
+        opts.forEach(function(o,i){ if(o.ok) kids[i].classList.add('correct'); });
+        if(opt.ok){ correct++; fb.className='fb ok show'; fb.innerHTML='<b>정답 ✅</b> '+opt.why; }
+        else { b.classList.add('wrong'); fb.className='fb no show'; fb.innerHTML='<b>오답 ❌</b> '+opt.why; }
+        if(scoreEl){ scoreEl.hidden=false; scoreEl.textContent=correct+' / '+total+' 정답'; }
+        if(live){ live.textContent=(opt.ok?'정답. ':'오답. ')+'현재 '+correct+'/'+total+'.'; }
+        if(answered===total && correct===total && gateEl){ gateEl.hidden=false; }
+      });
+      card.appendChild(b);
+    });
+    card.appendChild(fb);
+    quiz.appendChild(card);
+  });
+})();
+===================================================================== */
