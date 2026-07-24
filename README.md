@@ -95,4 +95,4 @@ More AI-workflow tooling by [@givepro91](https://github.com/givepro91):
 
 ## License
 
-MIT © 2026 Jay (Spacewalk)
+MIT © 2026 givepro91

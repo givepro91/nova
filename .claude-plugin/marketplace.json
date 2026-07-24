@@ -1,6 +1,6 @@
 {
   "name": "nova",
-  "owner": { "name": "Jay (Spacewalk)", "email": "jay@spacewalk.tech" },
+  "owner": { "name": "givepro91", "email": "givepro91@gmail.com" },
   "plugins": [
     {
       "name": "nova",

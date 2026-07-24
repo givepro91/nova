@@ -34,7 +34,7 @@ One lightweight loop for keeping the `nova` plugin healthy and current. Nova is 
    ```
    Then **dogfood Nova's own gate**: run `/gate` on this dev session — an independent verifier maps your "done" claims to evidence. Nova must clear its own honesty bar. Changed the renderer or a hook? Extend a test, don't eyeball.
 
-5. **Ship (explicit approval only).** Bump `plugins/nova/.claude-plugin/plugin.json` (patch: fix/docs · minor: new/changed skill or hook). Commit (`feat:`/`fix:`/`update:`/`docs:`/`chore:`). Push + `gh release` only on the user's word (givepro91 account — switch active, push, restore jay-swk).
+5. **Ship (explicit approval only).** Bump `plugins/nova/.claude-plugin/plugin.json` (patch: fix/docs · minor: new/changed skill or hook). Commit (`feat:`/`fix:`/`update:`/`docs:`/`chore:`). Push + `gh release` only on the user's word (givepro91 account — switch active, push).
 
 ## Validate by dogfooding (lightweight)
 

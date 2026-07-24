@@ -170,7 +170,7 @@ cd /Users/keunsik/develop/givepro91/nova && git add README.md CLAUDE.md && git s
 
 - [ ] **Step 1: 스킬 로드 스모크** — Claude Code에서 `/scout`가 인식되는지(플러그인 로컬 설치 상태) 확인. 미설치면 `/plugin marketplace add /Users/keunsik/develop/givepro91/nova` → `/plugin install nova@nova` 후 재확인.
 
-- [ ] **Step 2: dry-run — 실제 레포에 `/scout`** — Spacewalk 제품 레포(또는 Nova 자신)에서 `/scout` 실행. 관찰 체크리스트:
+- [ ] **Step 2: dry-run — 실제 레포에 `/scout`** — 실제 제품 레포(또는 Nova 자신)에서 `/scout` 실행. 관찰 체크리스트:
   - Phase A 이해 요약이 실제 프로젝트를 맞게 파악했는가.
   - 후보가 §3 5요소로 성립하는가(억지 후보 아님).
   - 랭킹 스코어카드가 G1~G3 + S1~S5 + 합계 + 이유로 나오는가.

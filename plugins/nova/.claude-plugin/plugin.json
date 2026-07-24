@@ -2,7 +2,7 @@
   "name": "nova",
   "description": "A compounding-agent nervous system for Claude Code, for both you and your coding agent — five loops in one plugin: rules + learning (/claude-md, /learn), continuity (/handoff + branch-aware hooks), completion-honesty gate (/gate, an independent claim→evidence verifier), and session worklog (/worklog, optional self-contained Nova-branded HTML). Honest, git-native, low context-tax; all hooks are opt-in per project (docs/handoff/ for handoff, .nova/gate.on for the gate nudge).",
   "version": "0.2.10",
-  "author": { "name": "Jay (Spacewalk)", "email": "jay@spacewalk.tech" },
+  "author": { "name": "givepro91", "email": "givepro91@gmail.com" },
   "homepage": "https://github.com/givepro91/nova",
   "repository": "https://github.com/givepro91/nova",
   "license": "MIT",
